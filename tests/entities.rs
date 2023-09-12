@@ -269,3 +269,39 @@ fn update_filtered_test() -> Result<(), TableInitError>{
     
     Ok(())
 }
+
+#[test]
+fn insert_test() -> Result<(), TableInitError> {
+    let mut t1 = Table::new(
+        None,
+        vec!["id", "username", "password"],
+        vec![
+            vec![
+                String::from("1"),
+                String::from("john.doe123"),
+                String::from("abcd1234"),
+            ],
+            vec![
+                String::from("2"),
+                String::from("jrogan_$89"),
+                String::from("zzz"),
+            ],
+        ],
+    )?;
+    let res = t1.insert(vec![
+        String::from("3"),
+        String::from("mickael76"),
+        String::from("okokokok"),
+    ]);
+    assert!(res.is_ok());
+    let mut iter = t1.iter();
+    iter.next();
+    iter.next();
+    let expected = vec![
+        String::from("3"),
+        String::from("mickael76"),
+        String::from("okokokok"),
+    ];
+    assert_eq!(Some(&expected), iter.next());
+    Ok(())
+}

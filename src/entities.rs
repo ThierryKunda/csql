@@ -229,4 +229,14 @@ impl Queryable for Table {
         }
         Ok(())
     }
+
+    fn insert(&mut self, new_record: Vec<String>) -> Result<(), QueryError> {
+        if self.columns_names.len() == new_record.len() {
+            self.records.push(new_record);
+            Ok(())
+        } else {
+            Err(QueryError)
+        }
+    }
+    
 }
