@@ -91,12 +91,12 @@ fn select_filtered_columns_test() -> Result<(), TableInitError> {
             ],
         ],
     )?;
-    let mut filters_1: HashMap<String, Filter> = HashMap::new();
-    filters_1.insert(String::from("id"), Filter::Equal(String::from("1")));
+    let mut filters_1: HashMap<(String, usize), Filter> = HashMap::new();
+    filters_1.insert((String::from("id"), 0), Filter::Equal(String::from("1")));
 
-    let mut filters_2: HashMap<String, Filter> = HashMap::new();
-    filters_2.insert(String::from("id"), Filter::Equal(String::from("1")));
-    filters_2.insert(String::from("password"), Filter::Equal(String::from("password_non_existent")));
+    let mut filters_2: HashMap<(String, usize), Filter> = HashMap::new();
+    filters_2.insert((String::from("id"), 0), Filter::Equal(String::from("1")));
+    filters_2.insert((String::from("password"), 0), Filter::Equal(String::from("password_non_existent")));
 
     let query_res_1 = t.select(Columns::All, Some(filters_1));
     assert_eq!(query_res_1, Ok(vec![
