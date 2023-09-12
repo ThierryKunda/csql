@@ -7,7 +7,7 @@ pub trait Queryable {
     fn delete(&mut self, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError>;
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum Filter {
     Equal(String),
     // GreaterThan(String),
