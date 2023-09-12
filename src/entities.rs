@@ -102,12 +102,12 @@ impl Table {
 
     fn get_indexed_filters(
         &self,
-        named_filters: HashMap<String, Filter>,
-    ) -> Result<HashMap<usize, Filter>, QueryError> {
-        let mut res: HashMap<usize, Filter> = HashMap::new();
+        named_filters: HashMap<(String, usize), Filter>,
+    ) -> Result<HashMap<(usize, usize), Filter>, QueryError> {
+        let mut res: HashMap<(usize, usize), Filter> = HashMap::new();
         for pair in named_filters.iter() {
-            let idx = self.get_column_index(pair.0)?;
-            res.insert(idx, pair.1.clone());
+            let idx = self.get_column_index(&pair.0.0)?;
+            res.insert((idx, pair.0.1.clone()), pair.1.clone());
         }
         Ok(res)
     }
@@ -127,7 +127,7 @@ impl Table {
 
     fn get_records_from_filters(
         &self,
-        filters: &HashMap<usize, Filter>,
+        filters: &HashMap<(usize, usize), Filter>,
     ) -> Result<Vec<Vec<String>>, QueryError> {
         let mut res = self.records.clone();
         for (idx, f) in filters.iter() {
@@ -135,7 +135,7 @@ impl Table {
                 Filter::Equal(s) => {
                     res = res
                         .into_iter()
-                        .filter(|v| v.get(idx.clone()) == Some(s))
+                        .filter(|v| v.get(idx.0.clone()) == Some(s))
                         .collect()
                 }
             }
@@ -146,7 +146,7 @@ impl Table {
     fn get_records(
         &self,
         column_indexes: Vec<usize>,
-        indexed_filters: Option<HashMap<usize, Filter>>,
+        indexed_filters: Option<HashMap<(usize, usize), Filter>>,
     ) -> Result<Vec<Vec<String>>, QueryError> {
         match indexed_filters {
             None => Ok(self
@@ -167,7 +167,7 @@ impl Queryable for Table {
     fn select(
         &self,
         attributes_names: Columns,
-        filters: Option<HashMap<String, Filter>>,
+        filters: Option<HashMap<(String, usize), Filter>>,
     ) -> Result<Vec<Vec<String>>, QueryError> {
         let col_indexes = self.get_column_indexes(attributes_names)?;
         let indexed_filters = match filters {
