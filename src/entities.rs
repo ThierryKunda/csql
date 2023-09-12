@@ -179,4 +179,23 @@ impl Queryable for Table {
             Some(map) => self.get_records(col_indexes, Some(map?)),
         }
     }
+
+    fn delete(&mut self, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError> {
+        match filters {
+            None => self.records = vec![],
+            Some(flt) => {
+                let indexed_filters = self.get_indexed_filters(flt)?;
+                for f in indexed_filters.iter() {
+                    self.records = match f.1 {
+                        Filter::Equal(s) => self.records
+                        .iter()
+                        .filter(|v| v.deref().get(f.0.0.clone()) != Some(s))
+                        .map(|v| v.clone())
+                        .collect(),
+                    };
+                }
+            },
+        }
+        Ok(())
+    }
 }

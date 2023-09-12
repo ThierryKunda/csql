@@ -107,3 +107,67 @@ fn select_filtered_columns_test() -> Result<(), TableInitError> {
 
     Ok(())
 }
+
+#[test]
+fn delete_test() -> Result<(), TableInitError> {
+    let mut t1 = Table::new(
+        None,
+        vec!["id", "username", "password"],
+        vec![
+            vec![
+                String::from("1"),
+                String::from("john.doe123"),
+                String::from("abcd1234"),
+            ],
+            vec![
+                String::from("2"),
+                String::from("jrogan_$89"),
+                String::from("zzz"),
+            ],
+        ],
+    )?;
+    let query_res = t1.delete(None);
+    assert!(query_res.is_ok());
+    assert!(t1.iter().next().is_none());
+    Ok(())
+}
+
+#[test]
+fn delete_filtered_test() -> Result<(), TableInitError> {
+    let mut t1 = Table::new(
+        None,
+        vec!["id", "username", "password"],
+        vec![
+            vec![
+                String::from("1"),
+                String::from("john.doe123"),
+                String::from("abcd1234"),
+            ],
+            vec![
+                String::from("2"),
+                String::from("jrogan_$89"),
+                String::from("zzz"),
+            ],
+            vec![
+                String::from("3"),
+                String::from("mickael76"),
+                String::from("okokokok"),
+            ],
+        ],
+    )?;
+    let mut filters: HashMap<(String, usize), Filter> = HashMap::new();
+    filters.insert((String::from("id"), 0), Filter::Equal(String::from("1"))); 
+    filters.insert((String::from("id"), 1), Filter::Equal(String::from("2"))); 
+    let query_res = t1.delete(Some(filters));
+    let mut iter = t1.iter();
+    assert!(query_res.is_ok());
+    let expected = vec![
+        String::from("3"),
+        String::from("mickael76"),
+        String::from("okokokok"),
+    ];
+    assert_eq!(Some(&expected), iter.next());
+    assert_eq!(None, iter.next());
+
+    Ok(())
+}
