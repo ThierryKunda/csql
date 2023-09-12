@@ -198,4 +198,35 @@ impl Queryable for Table {
         }
         Ok(())
     }
+
+    fn update(&mut self, column_name: String, new_value: &String, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError> {
+        let col_index = self.get_column_index(&column_name)?;
+        match filters {
+            None => for r in self.records.iter_mut() {
+                r.remove(col_index);
+                r.insert(col_index, new_value.clone());
+            },
+            Some(flt) => {
+                let indexed_filters = self.get_indexed_filters(flt)?;
+                for r in self.records.iter_mut() {
+                    let mut to_update = true;
+                    for ((idx, _), f) in indexed_filters.iter() {
+                        match f {
+                            Filter::Equal(s) => if Some(s) == r.get(idx.clone()) {
+                                to_update = to_update && true
+                            } else {
+                                to_update = to_update && false
+                            },
+                        }
+                    }
+                    println!("{}", to_update);
+                    if to_update {
+                        r.remove(col_index);
+                        r.insert(col_index, new_value.clone());
+                    }
+                }
+            },
+        }
+        Ok(())
+    }
 }

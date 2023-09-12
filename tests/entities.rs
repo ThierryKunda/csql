@@ -171,3 +171,101 @@ fn delete_filtered_test() -> Result<(), TableInitError> {
 
     Ok(())
 }
+
+#[test]
+fn update_test() -> Result<(), TableInitError> {
+    let mut t1 = Table::new(
+        None,
+        vec!["id", "username", "password"],
+        vec![
+            vec![
+                String::from("1"),
+                String::from("john.doe123"),
+                String::from("abcd1234"),
+            ],
+            vec![
+                String::from("2"),
+                String::from("jrogan_$89"),
+                String::from("zzz"),
+            ],
+            vec![
+                String::from("3"),
+                String::from("mickael76"),
+                String::from("okokokok"),
+            ],
+        ],
+    )?;
+    let res = t1.update(String::from("username"), &String::from("New name here !"), None);
+    assert!(res.is_ok());
+    let e1 = vec![
+        String::from("1"),
+        String::from("New name here !"),
+        String::from("abcd1234"),
+    ];
+    let e2 = vec![
+        String::from("2"),
+        String::from("New name here !"),
+        String::from("zzz"),
+    ];
+    let e3 = vec![
+        String::from("3"),
+        String::from("New name here !"),
+        String::from("okokokok"),
+    ];
+    let mut iter = t1.iter();
+    assert_eq!(Some(&e1), iter.next());
+    assert_eq!(Some(&e2), iter.next());
+    assert_eq!(Some(&e3), iter.next());
+
+    Ok(())
+}
+
+#[test]
+fn update_filtered_test() -> Result<(), TableInitError>{
+    let mut t1 = Table::new(
+        None,
+        vec!["id", "username", "password"],
+        vec![
+            vec![
+                String::from("1"),
+                String::from("john.doe123"),
+                String::from("abcd1234"),
+            ],
+            vec![
+                String::from("2"),
+                String::from("jrogan_$89"),
+                String::from("zzz"),
+            ],
+            vec![
+                String::from("3"),
+                String::from("mickael76"),
+                String::from("okokokok"),
+            ],
+        ],
+    )?;
+    let mut filters: HashMap<(String, usize), Filter> = HashMap::new();
+    filters.insert((String::from("id"), 0), Filter::Equal(String::from("1")));
+    let res = t1.update(String::from("username"), &String::from("New name here !"), Some(filters));
+    assert!(res.is_ok());
+    let e1 = vec![
+        String::from("1"),
+        String::from("New name here !"),
+        String::from("abcd1234"),
+    ];
+    let e2 = vec![
+        String::from("2"),
+        String::from("jrogan_$89"),
+        String::from("zzz"),
+    ];
+    let e3 = vec![
+        String::from("3"),
+        String::from("mickael76"),
+        String::from("okokokok"),
+    ];
+    let mut iter = t1.iter();
+    assert_eq!(Some(&e1), iter.next());
+    assert_eq!(Some(&e2), iter.next());
+    assert_eq!(Some(&e3), iter.next());
+    
+    Ok(())
+}
