@@ -2,13 +2,28 @@ use crate::{
     errors::{QueryError, TableInitError},
     interfaces::{Filter, Queryable, Columns},
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::Deref};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Table {
     name: Option<String>,
     columns_names: Vec<String>,
     records: Vec<Vec<String>>,
+}
+
+pub struct TableIter<'a> {
+    records: &'a Vec<Vec<String>>,
+    current_record_index: usize,
+}
+
+impl<'a> Iterator for TableIter<'a> {
+    type Item = &'a Vec<String>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let res = self.records.get(self.current_record_index);
+        self.current_record_index += 1;
+        res
+    }
 }
 
 impl Table {
@@ -55,6 +70,10 @@ impl Table {
                 .collect(),
             records,
         })
+    }
+
+    pub fn iter(&self) -> TableIter {
+        TableIter { records: &self.records, current_record_index: 0 }
     }
 
     fn get_column_index(&self, column_name: &String) -> Result<usize, QueryError> {
