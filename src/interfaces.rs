@@ -10,9 +10,9 @@ pub trait Queryable {
 }
 
 pub trait Recordable {
-    fn get_record_as_collection(&self) -> Vec<String>; 
+    fn get_record_as_collection(&self) -> Vec<Option<String>>; 
     fn get_attr_index_from_name(&self, attr_name: &String) -> Result<usize, QueryError>;
-    fn get_attr_value(&self, attr_name: &String) -> Result<String, QueryError> {
+    fn get_attr_value(&self, attr_name: &String) -> Result<Option<String>, QueryError> {
         let coll = self.get_record_as_collection();
         let idx = self.get_attr_index_from_name(attr_name)?;
         match coll.get(idx) {
