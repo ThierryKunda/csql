@@ -61,3 +61,26 @@ impl Display for QueryError {
       write!(f, "Error while querying...")
     }
 }
+
+#[derive(Debug)]
+pub struct FlushError;
+
+impl Error for FlushError {}
+
+impl Display for FlushError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+      write!(f, "Error while saving changes in the physical item.")
+    }
+}
+
+#[derive(Debug)]
+pub struct LoadingError;
+
+impl Error for LoadingError {}
+
+impl Display for LoadingError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+      write!(f, "Error while loading data from the physical item.")
+    }
+}
+

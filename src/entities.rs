@@ -8,21 +8,21 @@ use std::{collections::HashMap, ops::Deref};
 pub struct Table {
     name: Option<String>,
     columns_names: Vec<String>,
-    records: Vec<Vec<String>>,
+    records: Vec<Vec<Option<String>>>,
 }
 
 pub struct TableIter<'a> {
-    records: &'a Vec<Vec<String>>,
+    records: &'a Vec<Vec<Option<String>>>,
     current_record_index: usize,
 }
 
 pub struct Record<'a> {
-    values: Vec<String>,
+    values: Vec<Option<String>>,
     headers: &'a Vec<String>,
 }
 
 impl<'a> Iterator for TableIter<'a> {
-    type Item = &'a Vec<String>;
+    type Item = &'a Vec<Option<String>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let res = self.records.get(self.current_record_index);
@@ -35,7 +35,7 @@ impl Table {
     pub fn new(
         name: Option<&str>,
         columns_names: Vec<&str>,
-        records: Vec<Vec<String>>,
+        records: Vec<Vec<Option<String>>>,
     ) -> Result<Self, TableInitError> {
         // Checks columns_names has at least one column name
         if columns_names.len() == 0 {
@@ -119,9 +119,9 @@ impl Table {
 
     fn get_record_attributes(
         &self,
-        record: &Vec<String>,
+        record: &Vec<Option<String>>,
         attribute_indexes: &Vec<usize>,
-    ) -> Vec<String> {
+    ) -> Vec<Option<String>> {
         record
             .iter()
             .enumerate()
@@ -133,14 +133,14 @@ impl Table {
     fn get_records_from_filters(
         &self,
         filters: &HashMap<(usize, usize), Filter>,
-    ) -> Result<Vec<Vec<String>>, QueryError> {
+    ) -> Result<Vec<Vec<Option<String>>>, QueryError> {
         let mut res = self.records.clone();
         for (idx, f) in filters.iter() {
             match f {
                 Filter::Equal(s) => {
                     res = res
                         .into_iter()
-                        .filter(|v| v.get(idx.0.clone()) == Some(s))
+                        .filter(|v| v.get(idx.0.clone()) == Some(&Some(s.clone())))
                         .collect()
                 }
             }
@@ -152,7 +152,7 @@ impl Table {
         &self,
         column_indexes: Vec<usize>,
         indexed_filters: Option<HashMap<(usize, usize), Filter>>,
-    ) -> Result<Vec<Vec<String>>, QueryError> {
+    ) -> Result<Vec<Vec<Option<String>>>, QueryError> {
         match indexed_filters {
             None => Ok(self
                 .records
@@ -173,7 +173,7 @@ impl Queryable for Table {
         &self,
         attributes_names: Columns,
         filters: Option<HashMap<(String, usize), Filter>>,
-    ) -> Result<Vec<Vec<String>>, QueryError> {
+    ) -> Result<Vec<Vec<Option<String>>>, QueryError> {
         let col_indexes = self.get_column_indexes(attributes_names)?;
         let indexed_filters = match filters {
             Some(map) => Some(self.get_indexed_filters(map)),
@@ -194,7 +194,7 @@ impl Queryable for Table {
                     self.records = match f.1 {
                         Filter::Equal(s) => self.records
                         .iter()
-                        .filter(|v| v.deref().get(f.0.0.clone()) != Some(s))
+                        .filter(|v| v.deref().get(f.0.0.clone()) != Some(&Some(s.clone())))
                         .map(|v| v.clone())
                         .collect(),
                     };
@@ -204,7 +204,7 @@ impl Queryable for Table {
         Ok(())
     }
 
-    fn update(&mut self, column_name: String, new_value: &String, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError> {
+    fn update(&mut self, column_name: String, new_value: &Option<String>, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError> {
         let col_index = self.get_column_index(&column_name)?;
         match filters {
             None => for r in self.records.iter_mut() {
@@ -217,7 +217,7 @@ impl Queryable for Table {
                     let mut to_update = true;
                     for ((idx, _), f) in indexed_filters.iter() {
                         match f {
-                            Filter::Equal(s) => if Some(s) == r.get(idx.clone()) {
+                            Filter::Equal(s) => if Some(&Some(s.clone())) == r.get(idx.clone()) {
                                 to_update = to_update && true
                             } else {
                                 to_update = to_update && false
@@ -235,7 +235,7 @@ impl Queryable for Table {
         Ok(())
     }
 
-    fn insert(&mut self, new_record: Vec<String>) -> Result<(), QueryError> {
+    fn insert(&mut self, new_record: Vec<Option<String>>) -> Result<(), QueryError> {
         if self.columns_names.len() == new_record.len() {
             self.records.push(new_record);
             Ok(())

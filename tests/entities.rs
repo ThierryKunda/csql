@@ -8,16 +8,16 @@ fn table_creation_test() {
         None,
         vec!["id", "username"],
         vec![
-            vec![String::from("1"), String::from("john.doe123")],
-            vec![String::from("2"), String::from("jrogan_$89")],
+            vec![Some(String::from("1")), Some(String::from("john.doe123"))],
+            vec![Some(String::from("2")), Some(String::from("jrogan_$89"))],
         ],
     );
     let t2 = Table::new(
         None,
         vec!["id", "username"],
         vec![
-            vec![String::from("1")],
-            vec![String::from("2"), String::from("jrogan_$89")],
+            vec![Some(String::from("1"))],
+            vec![Some(String::from("2")), Some(String::from("jrogan_$89"))],
         ],
     );
     assert!(t1.is_ok());
@@ -31,19 +31,19 @@ fn select_one_column_test() -> Result<(), TableInitError> {
         vec!["id", "username", "password"],
         vec![
             vec![
-                String::from("1"),
-                String::from("john.doe123"),
-                String::from("abcd1234"),
+                Some(String::from("1")),
+                Some(String::from("john.doe123")),
+                Some(String::from("abcd1234")),
             ],
             vec![
-                String::from("2"),
-                String::from("jrogan_$89"),
-                String::from("zzz"),
+                Some(String::from("2")),
+                Some(String::from("jrogan_$89")),
+                Some(String::from("zzz")),
             ],
         ],
     )?;
     let query_res = t.select(csql::interfaces::Columns::ColumnNames(vec![String::from("id")]), None);
-    assert_eq!(query_res, Ok(vec![vec![String::from("1")], vec![String::from("2")]]));
+    assert_eq!(query_res, Ok(vec![vec![Some(String::from("1"))], vec![Some(String::from("2"))]]));
     Ok(())
 }
 
@@ -54,21 +54,21 @@ fn select_multiple_columns_test() -> Result<(), TableInitError> {
         vec!["id", "username", "password"],
         vec![
             vec![
-                String::from("1"),
-                String::from("john.doe123"),
-                String::from("abcd1234"),
+                Some(String::from("1")),
+                Some(String::from("john.doe123")),
+                Some(String::from("abcd1234")),
             ],
             vec![
-                String::from("2"),
-                String::from("jrogan_$89"),
-                String::from("zzz"),
+                Some(String::from("2")),
+                Some(String::from("jrogan_$89")),
+                Some(String::from("zzz")),
             ],
         ],
     )?;
     let query_res = t.select(Columns::ColumnNames(vec![String::from("id"), String::from("password")]), None);
     assert_eq!(query_res, Ok(vec![
-        vec![String::from("1"), String::from("abcd1234")],
-        vec![String::from("2"), String::from("zzz")],
+        vec![Some(String::from("1")), Some(String::from("abcd1234"))],
+        vec![Some(String::from("2")), Some(String::from("zzz"))],
     ]));
     Ok(())
 }
@@ -80,14 +80,14 @@ fn select_filtered_columns_test() -> Result<(), TableInitError> {
         vec!["id", "username", "password"],
         vec![
             vec![
-                String::from("1"),
-                String::from("john.doe123"),
-                String::from("abcd1234"),
+                Some(String::from("1")),
+                Some(String::from("john.doe123")),
+                Some(String::from("abcd1234")),
             ],
             vec![
-                String::from("2"),
-                String::from("jrogan_$89"),
-                String::from("zzz"),
+                Some(String::from("2")),
+                Some(String::from("jrogan_$89")),
+                Some(String::from("zzz")),
             ],
         ],
     )?;
@@ -100,7 +100,7 @@ fn select_filtered_columns_test() -> Result<(), TableInitError> {
 
     let query_res_1 = t.select(Columns::All, Some(filters_1));
     assert_eq!(query_res_1, Ok(vec![
-        vec![String::from("1"), String::from("john.doe123"), String::from("abcd1234")],
+        vec![Some(String::from("1")), Some(String::from("john.doe123")), Some(String::from("abcd1234"))],
     ]));
     let query_res_2 = t.select(Columns::All, Some(filters_2));
     assert_eq!(query_res_2, Ok(vec![]));
@@ -115,14 +115,14 @@ fn delete_test() -> Result<(), TableInitError> {
         vec!["id", "username", "password"],
         vec![
             vec![
-                String::from("1"),
-                String::from("john.doe123"),
-                String::from("abcd1234"),
+                Some(String::from("1")),
+                Some(String::from("john.doe123")),
+                Some(String::from("abcd1234")),
             ],
             vec![
-                String::from("2"),
-                String::from("jrogan_$89"),
-                String::from("zzz"),
+                Some(String::from("2")),
+                Some(String::from("jrogan_$89")),
+                Some(String::from("zzz")),
             ],
         ],
     )?;
@@ -139,19 +139,19 @@ fn delete_filtered_test() -> Result<(), TableInitError> {
         vec!["id", "username", "password"],
         vec![
             vec![
-                String::from("1"),
-                String::from("john.doe123"),
-                String::from("abcd1234"),
+                Some(String::from("1")),
+                Some(String::from("john.doe123")),
+                Some(String::from("abcd1234")),
             ],
             vec![
-                String::from("2"),
-                String::from("jrogan_$89"),
-                String::from("zzz"),
+                Some(String::from("2")),
+                Some(String::from("jrogan_$89")),
+                Some(String::from("zzz")),
             ],
             vec![
-                String::from("3"),
-                String::from("mickael76"),
-                String::from("okokokok"),
+                Some(String::from("3")),
+                Some(String::from("mickael76")),
+                Some(String::from("okokokok")),
             ],
         ],
     )?;
@@ -162,9 +162,9 @@ fn delete_filtered_test() -> Result<(), TableInitError> {
     let mut iter = t1.iter();
     assert!(query_res.is_ok());
     let expected = vec![
-        String::from("3"),
-        String::from("mickael76"),
-        String::from("okokokok"),
+        Some(String::from("3")),
+        Some(String::from("mickael76")),
+        Some(String::from("okokokok")),
     ];
     assert_eq!(Some(&expected), iter.next());
     assert_eq!(None, iter.next());
@@ -179,38 +179,38 @@ fn update_test() -> Result<(), TableInitError> {
         vec!["id", "username", "password"],
         vec![
             vec![
-                String::from("1"),
-                String::from("john.doe123"),
-                String::from("abcd1234"),
+                Some(String::from("1")),
+                Some(String::from("john.doe123")),
+                Some(String::from("abcd1234")),
             ],
             vec![
-                String::from("2"),
-                String::from("jrogan_$89"),
-                String::from("zzz"),
+                Some(String::from("2")),
+                Some(String::from("jrogan_$89")),
+                Some(String::from("zzz")),
             ],
             vec![
-                String::from("3"),
-                String::from("mickael76"),
-                String::from("okokokok"),
+                Some(String::from("3")),
+                Some(String::from("mickael76")),
+                Some(String::from("okokokok")),
             ],
         ],
     )?;
-    let res = t1.update(String::from("username"), &String::from("New name here !"), None);
+    let res = t1.update(String::from("username"), &Some(String::from("New name here !")), None);
     assert!(res.is_ok());
     let e1 = vec![
-        String::from("1"),
-        String::from("New name here !"),
-        String::from("abcd1234"),
+        Some(String::from("1")),
+        Some(String::from("New name here !")),
+        Some(String::from("abcd1234")),
     ];
     let e2 = vec![
-        String::from("2"),
-        String::from("New name here !"),
-        String::from("zzz"),
+        Some(String::from("2")),
+        Some(String::from("New name here !")),
+        Some(String::from("zzz")),
     ];
     let e3 = vec![
-        String::from("3"),
-        String::from("New name here !"),
-        String::from("okokokok"),
+        Some(String::from("3")),
+        Some(String::from("New name here !")),
+        Some(String::from("okokokok")),
     ];
     let mut iter = t1.iter();
     assert_eq!(Some(&e1), iter.next());
@@ -227,40 +227,40 @@ fn update_filtered_test() -> Result<(), TableInitError>{
         vec!["id", "username", "password"],
         vec![
             vec![
-                String::from("1"),
-                String::from("john.doe123"),
-                String::from("abcd1234"),
+                Some(String::from("1")),
+                Some(String::from("john.doe123")),
+                Some(String::from("abcd1234")),
             ],
             vec![
-                String::from("2"),
-                String::from("jrogan_$89"),
-                String::from("zzz"),
+                Some(String::from("2")),
+                Some(String::from("jrogan_$89")),
+                Some(String::from("zzz")),
             ],
             vec![
-                String::from("3"),
-                String::from("mickael76"),
-                String::from("okokokok"),
+                Some(String::from("3")),
+                Some(String::from("mickael76")),
+                Some(String::from("okokokok")),
             ],
         ],
     )?;
     let mut filters: HashMap<(String, usize), Filter> = HashMap::new();
     filters.insert((String::from("id"), 0), Filter::Equal(String::from("1")));
-    let res = t1.update(String::from("username"), &String::from("New name here !"), Some(filters));
+    let res = t1.update(String::from("username"), &Some(String::from("New name here !")), Some(filters));
     assert!(res.is_ok());
     let e1 = vec![
-        String::from("1"),
-        String::from("New name here !"),
-        String::from("abcd1234"),
+        Some(String::from("1")),
+        Some(String::from("New name here !")),
+        Some(String::from("abcd1234")),
     ];
     let e2 = vec![
-        String::from("2"),
-        String::from("jrogan_$89"),
-        String::from("zzz"),
+        Some(String::from("2")),
+        Some(String::from("jrogan_$89")),
+        Some(String::from("zzz")),
     ];
     let e3 = vec![
-        String::from("3"),
-        String::from("mickael76"),
-        String::from("okokokok"),
+        Some(String::from("3")),
+        Some(String::from("mickael76")),
+        Some(String::from("okokokok")),
     ];
     let mut iter = t1.iter();
     assert_eq!(Some(&e1), iter.next());
@@ -277,30 +277,30 @@ fn insert_test() -> Result<(), TableInitError> {
         vec!["id", "username", "password"],
         vec![
             vec![
-                String::from("1"),
-                String::from("john.doe123"),
-                String::from("abcd1234"),
+                Some(String::from("1")),
+                Some(String::from("john.doe123")),
+                Some(String::from("abcd1234")),
             ],
             vec![
-                String::from("2"),
-                String::from("jrogan_$89"),
-                String::from("zzz"),
+                Some(String::from("2")),
+                Some(String::from("jrogan_$89")),
+                Some(String::from("zzz")),
             ],
         ],
     )?;
     let res = t1.insert(vec![
-        String::from("3"),
-        String::from("mickael76"),
-        String::from("okokokok"),
+        Some(String::from("3")),
+        Some(String::from("mickael76")),
+        Some(String::from("okokokok")),
     ]);
     assert!(res.is_ok());
     let mut iter = t1.iter();
     iter.next();
     iter.next();
     let expected = vec![
-        String::from("3"),
-        String::from("mickael76"),
-        String::from("okokokok"),
+        Some(String::from("3")),
+        Some(String::from("mickael76")),
+        Some(String::from("okokokok")),
     ];
     assert_eq!(Some(&expected), iter.next());
     Ok(())
