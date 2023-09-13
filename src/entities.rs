@@ -16,6 +16,11 @@ pub struct TableIter<'a> {
     current_record_index: usize,
 }
 
+pub struct Record<'a> {
+    values: Vec<String>,
+    headers: &'a Vec<String>,
+}
+
 impl<'a> Iterator for TableIter<'a> {
     type Item = &'a Vec<String>;
 
