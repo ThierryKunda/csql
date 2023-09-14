@@ -21,8 +21,65 @@ pub struct Record<'a> {
     headers: &'a Vec<String>,
 }
 
+impl Record<'_> {
+    pub fn new(values: Vec<Option<String>>, headers: &Vec<String>) -> Self {
+        Self { values, headers }
+    }
+}
+
+impl Recordable for Record<'_> {
+    fn get_record_as_collection(&self) -> Vec<Option<String>> {
+        self.values.clone()
+    }
+
+    fn get_attr_index_from_name(&self, attr_name: &String) -> Result<usize, QueryError> {
+        match self.headers.iter().position(|n| n == attr_name) {
+            Some(idx) => Ok(idx),
+            None => Err(QueryError),
+        }
+    }
+
+    fn update_value(&mut self, attr_name: &String, new_value: &String) -> Result<(), QueryError> {
+        match self.headers.iter().position(|n| n == attr_name) {
+            Some(idx) => match self.values.get_mut(idx) {
+                    Some(v) => {
+                        *v = None;
+                        Ok(())
+                    },
+                    None => Err(QueryError),
+                },
+            None => Err(QueryError),
+        }
+    }
+
+    fn satisfy_conditions(&self, cond: &Condition) -> Result<bool, QueryError> {
+        match cond {
+            Condition::Equal(col, v) => Ok(self.get_attr_value(col)? == Some(v.to_string())),
+            Condition::GreaterThan(col, v) => Ok(self.get_attr_value(col)? > Some(v.to_string())),
+            Condition::LessThan(col, v) => Ok(self.get_attr_value(col)? < Some(v.to_string())),
+            Condition::Or(cnd1, cnd2) => Ok(self.satisfy_conditions(cnd1)? || self.satisfy_conditions(cnd2)?),
+            Condition::And(cnd1, cnd2) => Ok(self.satisfy_conditions(cnd1)? && self.satisfy_conditions(cnd2)?),
+        }
+    }
+
+    fn get_attr_value(&self, attr_name: &String) -> Result<Option<String>, QueryError> {
+        todo!()
+    }
+
+    fn get_attr_values(&self, attr_names: &Vec<String>) -> Result<Vec<Option<String>>, QueryError> {
+        let attr_indexes = attr_names.iter()
+        .map(|name| self.get_attr_index_from_name(name))
+        .collect::<Result<Vec<usize>, QueryError>>()?;
+        Ok(self.values.iter()
+        .enumerate()
+        .filter(|(idx, _)| attr_indexes.contains(idx))
+        .map(|(_, v)| v.clone())
+        .collect())
+    }
+}
+
 impl<'a> Iterator for TableIter<'a> {
-    type Item = &'a Vec<Option<String>>;
+    type Item = &'a Record<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let res = self.records.get(self.current_record_index);
@@ -31,7 +88,7 @@ impl<'a> Iterator for TableIter<'a> {
     }
 }
 
-impl Table {
+impl Table<'_> {
     pub fn new(
         name: Option<&str>,
         columns_names: Vec<&str>,
@@ -73,7 +130,13 @@ impl Table {
             columns_names: columns_names.iter()
                 .map(|col| col.to_string())
                 .collect(),
-            records,
+            records: records.iter()
+            .map(|r|
+                Record::new(r.clone(), &columns_names
+                .iter()
+                .map(|v| v.to_string())
+                .collect()))
+            .collect(),
         })
     }
 
