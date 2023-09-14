@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::errors::{QueryError, FlushError, LoadingError};
 
 pub trait Queryable {
-    fn select(&self, attributes_names: Columns, filters: Option<HashMap<(String, usize), Filter>>) -> Result<Vec<Vec<Option<String>>>, QueryError>;
+    fn select(&self, attributes_names: Columns, conditions: &Condition) -> Result<Vec<Vec<Option<String>>>, QueryError>;
     fn delete(&mut self, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError>;
     fn update(&mut self, column_name: String, new_value: &Option<String>, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError>;
     fn insert(&mut self, new_record: Vec<Option<String>>) -> Result<(), QueryError>;

@@ -130,58 +130,22 @@ impl Table {
             .collect()
     }
 
-    fn get_records_from_filters(
-        &self,
-        filters: &HashMap<(usize, usize), Filter>,
-    ) -> Result<Vec<Vec<Option<String>>>, QueryError> {
-        let mut res = self.records.clone();
-        for (idx, f) in filters.iter() {
-            match f {
-                Filter::Equal(s) => {
-                    res = res
-                        .into_iter()
-                        .filter(|v| v.get(idx.0.clone()) == Some(&Some(s.clone())))
-                        .collect()
-                }
-            }
-        }
-        Ok(res)
-    }
-
-    fn get_records(
-        &self,
-        column_indexes: Vec<usize>,
-        indexed_filters: Option<HashMap<(usize, usize), Filter>>,
-    ) -> Result<Vec<Vec<Option<String>>>, QueryError> {
-        match indexed_filters {
-            None => Ok(self
-                .records
-                .iter()
-                .map(|v| self.get_record_attributes(v, &column_indexes))
-                .collect()),
-            Some(filters) => Ok(self
-                .get_records_from_filters(&filters)?
-                .iter()
-                .map(|v| self.get_record_attributes(v, &column_indexes))
-                .collect()),
-        }
-    }
 }
 
-impl Queryable for Table {
+impl Queryable for Table<'_> {
     fn select(
         &self,
         attributes_names: Columns,
-        filters: Option<HashMap<(String, usize), Filter>>,
+        conditions: &Condition,
     ) -> Result<Vec<Vec<Option<String>>>, QueryError> {
-        let col_indexes = self.get_column_indexes(attributes_names)?;
-        let indexed_filters = match filters {
-            Some(map) => Some(self.get_indexed_filters(map)),
-            None => None,
-        };
-        match indexed_filters {
-            None => self.get_records(col_indexes, None),
-            Some(map) => self.get_records(col_indexes, Some(map?)),
+        match attributes_names {
+            Columns::All => Ok(self.records.iter()
+            .map(|r| r.get_record_as_collection())
+            .collect()),
+            Columns::ColumnNames(_) => Ok(self.records.iter()
+            .filter(|r| r.satisfy_conditions(conditions)?)
+            .map(|r| r.get_record_as_collection())
+            .collect()),
         }
     }
 
