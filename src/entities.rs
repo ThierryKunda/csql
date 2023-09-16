@@ -130,14 +130,7 @@ impl Table<Record> {
     pub fn iter(&self) -> TableIter {
         TableIter { records: &self.records, current_record_index: 0 }
     }
-
-    fn get_column_index(&self, column_name: &String) -> Result<usize, QueryError> {
-        let res = self.columns_names.iter().position(|el| el == column_name);
-        match res {
-            Some(v) => Ok(v),
-            None => Err(QueryError),
-        }
-    }
+}
 
     fn get_column_indexes(&self, column_names: Columns) -> Result<Vec<usize>, QueryError> {
         match column_names {
