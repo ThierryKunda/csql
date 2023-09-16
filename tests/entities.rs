@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use csql::{entities::*, errors::TableInitError, interfaces::{Queryable, Columns, InsertElement, Condition, Recordable}};
+use csql::{entities::*, errors::TableInitError, traits::{Queryable, Columns, InsertElement, Condition, Recordable}};
 
 #[test]
 fn table_creation_test() {

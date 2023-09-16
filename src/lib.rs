@@ -1,4 +1,4 @@
-// pub mod parsing;
 pub mod errors;
 pub mod entities;
-pub mod interfaces;
+pub mod traits;
+pub mod file_parsing;

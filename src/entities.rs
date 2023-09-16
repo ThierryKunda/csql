@@ -1,6 +1,6 @@
 use crate::{
     errors::{QueryError, TableInitError, LoadingError},
-    interfaces::{Queryable, Columns, Recordable, Condition, InsertElement, Loadable},
+    traits::{Queryable, Columns, Recordable, Condition, InsertElement, Loadable},
 };
 use std::{collections::HashMap, rc::Rc};
 
