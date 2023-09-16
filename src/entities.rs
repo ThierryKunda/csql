@@ -98,8 +98,7 @@ impl<'a> Iterator for TableIter<'a> {
 impl Table<Record> {
     pub fn new(
         name: Option<&str>,
-        columns_names: Vec<&str>,
-        records: Vec<Vec<Option<String>>>,
+        columns_names: &Vec<&str>,
     ) -> Result<Self, TableInitError> {
         // Checks columns_names has at least one column name
         if columns_names.len() == 0 {
