@@ -13,7 +13,7 @@ where T: Recordable {
 }
 
 pub struct TableIter<'a> {
-    records: &'a Vec<Vec<Option<String>>>,
+    records: &'a Vec<Record>,
     current_record_index: usize,
 }
 
