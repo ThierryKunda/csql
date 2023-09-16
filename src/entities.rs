@@ -122,14 +122,8 @@ impl Table<Record> {
             name: name.map(|v| v.to_string()),
             columns_names: Rc::new(columns_names.iter()
                 .map(|col| col.to_string())
-                .collect(),
-            records: records.iter()
-            .map(|r|
-                Record::new(r.clone(), &columns_names
-                .iter()
-                .map(|v| v.to_string())
-                .collect()))
-            .collect(),
+                .collect()),
+            records: vec![],
         })
     }
 
