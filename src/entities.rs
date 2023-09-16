@@ -132,123 +132,104 @@ impl Table<Record> {
     }
 }
 
-    fn get_column_indexes(&self, column_names: Columns) -> Result<Vec<usize>, QueryError> {
-        match column_names {
-            Columns::All => Ok(
-                self.columns_names
-                .iter()
-                .enumerate()
-                .map(|pair| pair.0)
-                .collect()
-            ),
-            Columns::ColumnNames(cols) => cols
-            .iter()
-            .map(|col| self.get_column_index(col))
-            .collect(),
-        }
-    }
-
-    fn get_indexed_filters(
-        &self,
-        named_filters: HashMap<(String, usize), Filter>,
-    ) -> Result<HashMap<(usize, usize), Filter>, QueryError> {
-        let mut res: HashMap<(usize, usize), Filter> = HashMap::new();
-        for pair in named_filters.iter() {
-            let idx = self.get_column_index(&pair.0.0)?;
-            res.insert((idx, pair.0.1.clone()), pair.1.clone());
-        }
-        Ok(res)
-    }
-
-    fn get_record_attributes(
-        &self,
-        record: &Vec<Option<String>>,
-        attribute_indexes: &Vec<usize>,
-    ) -> Vec<Option<String>> {
-        record
-            .iter()
-            .enumerate()
-            .filter(|v| attribute_indexes.contains(&v.0))
-            .map(|v| v.1.clone())
-            .collect()
-    }
-
-}
-
-impl Queryable for Table<'_> {
+impl Queryable<Record> for Table<Record> {
     fn select(
         &self,
         attributes_names: Columns,
-        conditions: &Condition,
+        conditions: &Option<Condition>,
     ) -> Result<Vec<Vec<Option<String>>>, QueryError> {
-        match attributes_names {
-            Columns::All => Ok(self.records.iter()
+        match (attributes_names, conditions) {
+            (Columns::All, None) => Ok(self.records
+            .iter()
             .map(|r| r.get_record_as_collection())
             .collect()),
-            Columns::ColumnNames(_) => Ok(self.records.iter()
-            .filter(|r| r.satisfy_conditions(conditions)?)
-            .map(|r| r.get_record_as_collection())
-            .collect()),
+            (Columns::All, Some(conds)) => {
+                let mut res: Vec<Vec<Option<String>>> = Vec::new();
+                for el in self.records.iter() {
+                    if el.satisfy_conditions(conds)? {
+                        res.push(el.get_record_as_collection());
+                    }
+                }
+                Ok(res)
+            },
+            (Columns::ColumnNames(cols), Some(conds)) => {
+                let mut res: Vec<Vec<Option<String>>> = Vec::new();
+                for el in self.records.iter() {
+                    if el.satisfy_conditions(conds)? {
+                        res.push(el.get_attr_values(&cols)?);
+                    }
+                }
+                Ok(res)
+            },
+            (Columns::ColumnNames(cols), None) => {
+                let mut res: Vec<Vec<Option<String>>> = Vec::new();
+                for el in self.records.iter() {
+                    res.push(el.get_attr_values(&cols)?);
+                }
+                Ok(res)
+            },
+            
         }
     }
 
-    fn delete(&mut self, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError> {
-        match filters {
-            None => self.records = vec![],
-            Some(flt) => {
-                let indexed_filters = self.get_indexed_filters(flt)?;
-                for f in indexed_filters.iter() {
-                    self.records = match f.1 {
-                        Filter::Equal(s) => self.records
-                        .iter()
-                        .filter(|v| v.deref().get(f.0.0.clone()) != Some(&Some(s.clone())))
-                        .map(|v| v.clone())
-                        .collect(),
-                    };
+    fn delete(&mut self, conditions: &Option<Condition>) -> Result<(), QueryError> {
+        match conditions {
+            None => self.records.clear(),
+            Some(conds) => {
+                let mut records_left: Vec<Record> = Vec::new();
+                    for r in self.iter() {
+                    if !r.satisfy_conditions(conds)? {
+                        records_left.push(r.clone());
+                    }
                 }
-            },
+                self.records = records_left;
+        },
         }
         Ok(())
     }
 
-    fn update(&mut self, column_name: String, new_value: &Option<String>, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError> {
-        let col_index = self.get_column_index(&column_name)?;
-        match filters {
+    fn update(&mut self, new_values: HashMap<String, Option<String>>, conditions: &Option<Condition>) -> Result<(), QueryError> {
+        match conditions {
             None => for r in self.records.iter_mut() {
-                r.remove(col_index);
-                r.insert(col_index, new_value.clone());
+                r.update_values(&new_values)?;
             },
-            Some(flt) => {
-                let indexed_filters = self.get_indexed_filters(flt)?;
-                for r in self.records.iter_mut() {
-                    let mut to_update = true;
-                    for ((idx, _), f) in indexed_filters.iter() {
-                        match f {
-                            Filter::Equal(s) => if Some(&Some(s.clone())) == r.get(idx.clone()) {
-                                to_update = to_update && true
-                            } else {
-                                to_update = to_update && false
-                            },
-                        }
-                    }
-                    println!("{}", to_update);
-                    if to_update {
-                        r.remove(col_index);
-                        r.insert(col_index, new_value.clone());
-                    }
+            Some(cond) => for r in self.records.iter_mut() {
+                if r.satisfy_conditions(cond)? {
+                    r.update_values(&new_values)?;
                 }
             },
         }
         Ok(())
     }
 
-    fn insert(&mut self, new_record: Vec<Option<String>>) -> Result<(), QueryError> {
-        if self.columns_names.len() == new_record.len() {
-            self.records.push(new_record);
-            Ok(())
-        } else {
-            Err(QueryError)
+    fn insert(&mut self, new_record: InsertElement) -> Result<(), QueryError> {
+        match new_record {
+            InsertElement::PlainValues(values) => if values.len() == self.columns_names.len() {
+                self.records.push(Record::new(values, Rc::clone(&self.columns_names)));
+                Ok(())
+            } else {
+                Err(QueryError)
+            },
+            InsertElement::MappedValues(mappings) => {
+                let new_values = self.columns_names.iter()
+                .map(|attr| match mappings.get(attr) {
+                    Some(v) => v.clone(),
+                    None => None,
+                }).collect();
+                self.records.push(Record::new(new_values, Rc::clone(&self.columns_names)));
+                Ok(())
+            },
         }
     }
+
+    fn bulk_load_data<'a, 'b>(&'a mut self, data: &'b impl Loadable) -> Result<(), LoadingError> {
+        self.records = data.bulk_data()?
+        .iter()
+        .map(|v| Record::new(v.clone(), Rc::clone(&self.columns_names)))
+        .collect();
+        Ok(())
+    }
+
+    
     
 }
