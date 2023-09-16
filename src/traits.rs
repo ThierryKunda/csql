@@ -42,5 +42,5 @@ pub enum InsertElement {
 
 pub trait Loadable: Sized {
     fn bulk_data<'a>(&self) -> Result<Vec<Vec<Option<String>>>, LoadingError>;
-    fn flush(&self) -> Result<(), FlushError>;
+    fn commit(&self) -> Result<(), FlushError>;
 }
