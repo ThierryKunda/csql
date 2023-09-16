@@ -67,7 +67,10 @@ impl Recordable for Record {
     }
 
     fn get_attr_value(&self, attr_name: &String) -> Result<Option<String>, QueryError> {
-        todo!()
+        let attr_index = self.get_attr_index_from_name(attr_name)?;
+         self.values.get(attr_index)
+        .map(|v| v.clone())
+        .ok_or(QueryError)
     }
 
     fn get_attr_values(&self, attr_names: &Vec<String>) -> Result<Vec<Option<String>>, QueryError> {
