@@ -5,10 +5,11 @@ use crate::{
 use std::{collections::HashMap, rc::Rc};
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Table {
+pub struct Table<T>
+where T: Recordable {
     name: Option<String>,
-    columns_names: Vec<String>,
-    records: Vec<Vec<Option<String>>>,
+    columns_names: Rc<Vec<String>>,
+    records: Vec<T>,
 }
 
 pub struct TableIter<'a> {
