@@ -2,11 +2,14 @@ use std::collections::HashMap;
 
 use crate::errors::{QueryError, FlushError, LoadingError};
 
-pub trait Queryable {
-    fn select(&self, attributes_names: Columns, conditions: &Condition) -> Result<Vec<Vec<Option<String>>>, QueryError>;
-    fn delete(&mut self, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError>;
-    fn update(&mut self, column_name: String, new_value: &Option<String>, filters: Option<HashMap<(String, usize), Filter>>) -> Result<(), QueryError>;
-    fn insert(&mut self, new_record: Vec<Option<String>>) -> Result<(), QueryError>;
+type ColumnName = String;
+type Value = Option<String>;
+pub trait Queryable<T: Recordable> {
+    fn bulk_load_data(&mut self, data: &impl Loadable) -> Result<(), LoadingError>;
+    fn select(&self, attributes_names: Columns, conditions: &Option<Condition>) -> Result<Vec<Vec<Option<String>>>, QueryError>;
+    fn delete(&mut self, conditions: &Option<Condition>) -> Result<(), QueryError>;
+    fn update(&mut self, new_values: HashMap<ColumnName, Value>, conditions: &Option<Condition>) -> Result<(), QueryError>;
+    fn insert(&mut self, new_record: InsertElement) -> Result<(), QueryError>;
 }
 
 pub trait Recordable {
