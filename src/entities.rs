@@ -118,19 +118,6 @@ impl Table<Record> {
                 ));
             }
         }
-        // Checking columns and each record have the same size
-        let columns_amount = columns_names.len();
-        for r in records.iter().enumerate() {
-            if r.1.len() != columns_amount {
-                return Err(TableInitError::new(
-                    format!(
-                        "The line n°{} does not have the right amount of columns",
-                        r.0
-                    )
-                    .as_str(),
-                ));
-            }
-        }
         Ok(Self {
             name: name.map(|v| v.to_string()),
             columns_names: columns_names.iter()
