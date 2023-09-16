@@ -15,25 +15,10 @@ pub trait Queryable<T: Recordable> {
 pub trait Recordable {
     fn get_record_as_collection(&self) -> Vec<Option<String>>; 
     fn get_attr_index_from_name(&self, attr_name: &String) -> Result<usize, QueryError>;
-    fn get_attr_value(&self, attr_name: &String) -> Result<Option<String>, QueryError> {
-        let coll = self.get_record_as_collection();
-        let idx = self.get_attr_index_from_name(attr_name)?;
-        match coll.get(idx) {
-            Some(v) => Ok(v.clone()),
-            None => Err(QueryError),
-        }
-    }
-    fn delete_value(&mut self, attr_name: &String) -> Result<(), QueryError>;
-    fn update_value(&mut self, attr_name: &String, new_value: &String) -> Result<(), QueryError>;
-}
-
-#[derive(Debug, Clone)]
-pub enum Filter {
-    Equal(String),
-    // GreaterThan(String),
-    // LessThan(String),
-    // GreaterOrEqualThan(String),
-    // LessOrEqualThan(String),
+    fn get_attr_value(&self, attr_name: &String) -> Result<Option<String>, QueryError>;
+    fn get_attr_values(&self, attr_names: &Vec<String>) -> Result<Vec<Option<String>>, QueryError>;
+    fn update_values(&mut self, new_values: &HashMap<ColumnName, Value>) -> Result<(), QueryError>;
+    fn satisfy_conditions(&self, cond: &Condition) -> Result<bool, QueryError>;
 }
 
 pub enum Condition {
