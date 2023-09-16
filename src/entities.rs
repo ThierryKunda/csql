@@ -20,16 +20,16 @@ pub struct TableIter<'a> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Record {
     values: Vec<Option<String>>,
-    headers: &'a Vec<String>,
+    headers: Rc<Vec<String>>,
 }
 
-impl Record<'_> {
-    pub fn new(values: Vec<Option<String>>, headers: &Vec<String>) -> Self {
-        Self { values, headers }
+impl Record {
+    pub fn new(values: Vec<Option<String>>, headers: Rc<Vec<String>>) -> Record {
+        Record { values, headers }
     }
 }
 
-impl Recordable for Record<'_> {
+impl Recordable for Record {
     fn get_record_as_collection(&self) -> Vec<Option<String>> {
         self.values.clone()
     }
