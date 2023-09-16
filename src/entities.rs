@@ -120,7 +120,7 @@ impl Table<Record> {
         }
         Ok(Self {
             name: name.map(|v| v.to_string()),
-            columns_names: columns_names.iter()
+            columns_names: Rc::new(columns_names.iter()
                 .map(|col| col.to_string())
                 .collect(),
             records: records.iter()
