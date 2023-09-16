@@ -1,8 +1,8 @@
 use crate::{
-    errors::{QueryError, TableInitError},
-    interfaces::{Filter, Queryable, Columns},
+    errors::{QueryError, TableInitError, LoadingError},
+    interfaces::{Queryable, Columns, Recordable, Condition, InsertElement, Loadable},
 };
-use std::{collections::HashMap, ops::Deref};
+use std::{collections::HashMap, rc::Rc};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Table {
