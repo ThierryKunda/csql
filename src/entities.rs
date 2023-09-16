@@ -86,7 +86,7 @@ impl Recordable for Record {
 }
 
 impl<'a> Iterator for TableIter<'a> {
-    type Item = &'a Record<'a>;
+    type Item = &'a Record;
 
     fn next(&mut self) -> Option<Self::Item> {
         let res = self.records.get(self.current_record_index);
