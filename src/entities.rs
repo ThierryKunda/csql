@@ -41,17 +41,19 @@ impl Recordable for Record {
         }
     }
 
-    fn update_value(&mut self, attr_name: &String, new_value: &String) -> Result<(), QueryError> {
-        match self.headers.iter().position(|n| n == attr_name) {
-            Some(idx) => match self.values.get_mut(idx) {
-                    Some(v) => {
-                        *v = None;
-                        Ok(())
+    fn update_values(&mut self, new_values: &HashMap<String, Option<String>>) -> Result<(), QueryError> {
+        let mut header_iter = self.headers.iter();
+        for (attr, val) in new_values {
+            match header_iter.position(|n| n == attr) {
+                Some(idx) => if let Some(v) = self.values.get_mut(idx) {
+                        *v = val.clone();
+                    } else {
+                        return Err(QueryError)
                     },
-                    None => Err(QueryError),
-                },
-            None => Err(QueryError),
+                None => return Err(QueryError),
+            }
         }
+        Ok(())
     }
 
     fn satisfy_conditions(&self, cond: &Condition) -> Result<bool, QueryError> {
