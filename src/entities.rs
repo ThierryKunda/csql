@@ -95,7 +95,7 @@ impl<'a> Iterator for TableIter<'a> {
     }
 }
 
-impl Table<'_> {
+impl Table<Record> {
     pub fn new(
         name: Option<&str>,
         columns_names: Vec<&str>,
