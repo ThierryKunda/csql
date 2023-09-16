@@ -33,7 +33,14 @@ pub enum Columns {
     All,
     ColumnNames(Vec<String>)
 }
-pub trait Loadable {
-    fn bulk_load(source_location: String) -> Result<Box<dyn Queryable>, LoadingError>;
-    fn flush() -> Result<(), FlushError>;
+
+pub enum InsertElement {
+    PlainValues(Vec<Value>),
+    MappedValues(HashMap<ColumnName, Value>),
+}
+
+
+pub trait Loadable: Sized {
+    fn bulk_data<'a>(&self) -> Result<Vec<Vec<Option<String>>>, LoadingError>;
+    fn flush(&self) -> Result<(), FlushError>;
 }
