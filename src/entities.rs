@@ -17,7 +17,8 @@ pub struct TableIter<'a> {
     current_record_index: usize,
 }
 
-pub struct Record<'a> {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Record {
     values: Vec<Option<String>>,
     headers: &'a Vec<String>,
 }
