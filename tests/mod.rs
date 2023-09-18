@@ -1,2 +1,5 @@
 #[cfg(test)]
-pub mod entities;
+mod entities;
+
+#[cfg(test)]
+mod file_parsing;
