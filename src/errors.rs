@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fmt::Display;
+use std::io::ErrorKind;
 
 #[derive(Debug)]
 pub struct TokenizeError {
@@ -63,18 +64,23 @@ impl Display for QueryError {
 }
 
 #[derive(Debug)]
-pub struct FlushError;
+pub struct CommitError;
 
-impl Error for FlushError {}
+impl Error for CommitError {}
 
-impl Display for FlushError {
+impl Display for CommitError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
       write!(f, "Error while saving changes in the physical item.")
     }
 }
 
 #[derive(Debug)]
-pub struct LoadingError;
+pub enum LoadingError {
+    InvalidUTF8Encoding(ErrorKind),
+    InvalidRecord(String),
+    SourceNotImplemented,
+    FailedFileLoading(ErrorKind),
+}
 
 impl Error for LoadingError {}
 
