@@ -1,6 +1,6 @@
 use crate::{
-    errors::{QueryError, TableInitError, LoadingError},
-    traits::{Queryable, Columns, Recordable, Condition, InsertElement, Loadable},
+    errors::{QueryError, TableInitError},
+    traits::{Queryable, Columns, Recordable, Condition, InsertElement},
 };
 use std::{collections::HashMap, rc::Rc};
 
@@ -221,15 +221,10 @@ impl Queryable<Record> for Table<Record> {
             },
         }
     }
-
-    fn bulk_load_data<'a, 'b>(&'a mut self, data: &'b impl Loadable) -> Result<(), LoadingError> {
-        self.records = data.bulk_data()?
-        .iter()
-        .map(|v| Record::new(v.clone(), Rc::clone(&self.columns_names)))
-        .collect();
-        Ok(())
+    
+    fn get_records_as_collection(&self) -> Vec<Vec<Option<String>>> {
+        self.records.iter()
+        .map(|r| r.get_record_as_collection())
+        .collect()
     }
-
-    
-    
 }
