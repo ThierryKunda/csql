@@ -55,7 +55,9 @@ where T: Recordable {
     fn load_from_source(source_path: &str, source_type: SourceType) -> Result<Self, LoadingError>;
     fn bulk_data(&self, columns_amount: usize) -> Result<Vec<Vec<Option<String>>>, LoadingError>;
     fn dump_data(&self, data: Vec<Vec<Option<String>>>) -> Result<(), ExportingError>;
-    fn commit(&mut self, query_subject: impl Queryable<T>) -> Result<(), CommitError>;
+    fn commit(&mut self, query_subject: impl Queryable<T>) -> Result<(), CommitError> {
+        self.dump_data(query_subject.get_records_as_collection()).map_err(|_| CommitError)
+    }
 }
 
 pub enum SourceType {
