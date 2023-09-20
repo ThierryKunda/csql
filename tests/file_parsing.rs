@@ -23,3 +23,15 @@ fn apply_select() -> Result<(), TableInitError> {
     assert_eq!(query_res, expected);
     Ok(())
 }
+
+#[test]
+fn dump_data_test() -> Result<(), TableInitError> {
+    let buf = Buffer::new(Source::FilePath(String::from("samples/example0.csv")));
+    let mut t = Table::new(None, &vec!["one", "two", "three"])?;
+    t.delete(&None).unwrap();
+    let new_data = t.get_records_as_collection();
+    println!("{:?}", new_data);
+    let res = buf.dump_data(new_data);
+    assert!(res.is_ok());
+    Ok(())
+}
