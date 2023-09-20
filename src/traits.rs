@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::errors::{QueryError, CommitError, LoadingError};
+use crate::errors::{QueryError, CommitError, LoadingError, ExportingError};
 
 type ColumnName = String;
 type Value = Option<String>;
