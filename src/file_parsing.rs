@@ -16,10 +16,11 @@ impl Buffer {
         Self { source }
     }
 
-    fn open_read_write_file(path: &String) -> Result<File, Error> {
+    fn open_read_write_file(path: &String, truncate: bool) -> Result<File, Error> {
         OpenOptions::new()
         .read(true)
         .write(true)
+        .truncate(truncate)
         .create(true)
         .open(path.as_str())
     }
@@ -73,7 +74,7 @@ impl Loadable<Record> for Buffer {
     fn bulk_data(&self, columns_amount: usize) -> Result<Vec<Vec<Option<String>>>, LoadingError> {
         match &self.source {
             Source::FilePath(file) => {
-                let f = Self::open_read_write_file(file);
+                let f = Self::open_read_write_file(file, false);
                 match f {
                     Ok(file) => {
                         let reader = BufReader::new(file);
@@ -99,7 +100,7 @@ impl Loadable<Record> for Buffer {
     fn commit(&mut self, query_subject: impl Queryable<Record>) -> Result<(), CommitError> {
         match &self.source {
             Source::FilePath(s) => {
-                let file = Self::open_read_write_file(s);
+                let file = Self::open_read_write_file(s, false);
                 match file {
                     Ok(mut f) => {
                         let str_colls = Self::collection_to_string(query_subject.get_records_as_collection());
