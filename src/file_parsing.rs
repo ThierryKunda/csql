@@ -117,4 +117,24 @@ impl Loadable<Record> for Buffer {
             
         }
     }
+
+    fn dump_data(&self, data: Vec<Vec<Option<String>>>) -> Result<(), crate::errors::ExportError> {
+        match &self.source {
+            Source::FilePath(p) => match Self::open_read_write_file(p, true) {
+                Ok(mut f) => {
+                    let col = Self::collection_to_string(data);
+                    println!("{:?}", col);
+                    let res: Result<(), Error> = write!(&mut f, "{}", col);
+                    match res {
+                        Ok(_) => Ok(()),
+                        Err(_) => Err(ExportError::Interrupted),
+                    }
+                },
+                Err(_) => Err(ExportError::ResourceNotFound),
+            },
+            Source::HttpUri(_) => todo!(),
+        }
+    }
+
+    
 }

@@ -4,7 +4,7 @@ use csql::errors::TableInitError;
 
 use csql::file_parsing::{Buffer, Source};
 
-use csql::traits::{Queryable, Loadable, Columns};
+use csql::traits::{Queryable, Loadable, Columns, Condition, SourceType};
 
 #[test]
 fn apply_select() -> Result<(), TableInitError> {
@@ -26,12 +26,20 @@ fn apply_select() -> Result<(), TableInitError> {
 
 #[test]
 fn dump_data_test() -> Result<(), TableInitError> {
-    let buf = Buffer::new(Source::FilePath(String::from("samples/example0.csv")));
+    let buf = Buffer::load_from_source("samples/example0.csv", SourceType::LocalFile).unwrap();
     let mut t = Table::new(None, &vec!["one", "two", "three"])?;
-    t.delete(&None).unwrap();
+    t.bulk_load_data(&buf.bulk_data(3).unwrap()).unwrap();
+    t.delete(&Some(Condition::Equal(String::from("one"), String::from("a")))).unwrap();
     let new_data = t.get_records_as_collection();
-    println!("{:?}", new_data);
+    let expected: Vec<Vec<Option<String>>> = vec![
+        vec![Some(String::from("1")), Some(String::from("2")), Some(String::from("3"))],
+        vec![Some(String::from("x")), Some(String::from("y")), Some(String::from("z"))],
+    ];
+    assert_eq!(expected, new_data);
+    println!("New data : {:?}", new_data);
     let res = buf.dump_data(new_data);
     assert!(res.is_ok());
+    let updated_data = buf.bulk_data(3).unwrap();
+    assert_eq!(expected, updated_data);
     Ok(())
 }
