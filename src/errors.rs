@@ -90,3 +90,19 @@ impl Display for LoadingError {
     }
 }
 
+#[derive(Debug)]
+pub enum ExportError {
+    Interrupted,
+    ResourceNotFound,
+}
+
+impl Error for ExportError {}
+
+impl Display for ExportError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            ExportError::Interrupted => write!(f, "Failed exporting data in physical item"),
+            ExportError::ResourceNotFound => write!(f, "Resource not found for exporting data"),
+        }
+    }
+}

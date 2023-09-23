@@ -1,6 +1,6 @@
 use std::{fs::{File, OpenOptions}, io::{BufReader, BufRead, Write, Error}};
 
-use crate::{traits::{Loadable, SourceType, Queryable}, errors::{LoadingError, CommitError}, entities::Record};
+use crate::{traits::{Loadable, SourceType, Queryable}, errors::{LoadingError, CommitError, ExportError}, entities::Record};
 
 pub enum Source {
     FilePath(String),
