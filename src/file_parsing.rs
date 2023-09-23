@@ -1,6 +1,6 @@
 use std::{fs::{File, OpenOptions}, io::{BufReader, BufRead, Write, Error}};
 
-use crate::{traits::{Loadable, SourceType, Queryable}, errors::{LoadingError, CommitError, ExportError}, entities::Record};
+use crate::{traits::{Loadable, SourceType}, errors::{LoadingError, ExportError}, entities::Record};
 
 pub enum Source {
     FilePath(String),
@@ -92,29 +92,6 @@ impl Loadable<Record> for Buffer {
                 }
             },
             Source::HttpUri(_) => Err(LoadingError::SourceNotImplemented),
-        }
-    }
-
-
-
-    fn commit(&mut self, query_subject: impl Queryable<Record>) -> Result<(), CommitError> {
-        match &self.source {
-            Source::FilePath(s) => {
-                let file = Self::open_read_write_file(s, false);
-                match file {
-                    Ok(mut f) => {
-                        let str_colls = Self::collection_to_string(query_subject.get_records_as_collection());
-                        let res = f.write(str_colls.as_bytes());
-                        match res {
-                            Ok(_) => Ok(()),
-                            Err(_) => Err(CommitError),
-                        }
-                    },
-                    Err(_) => Err(CommitError),
-                }
-            },
-            Source::HttpUri(_) => Err(CommitError),
-            
         }
     }
 
