@@ -23,6 +23,16 @@ impl Buffer {
         .create(true)
         .open(path.as_str())
     }
+
+    fn record_to_string(record: &Vec<Option<String>>) -> String {
+        let res: Vec<String> = record.iter()
+        .map(|val| match val {
+            Some(v) => v.clone(),
+            None => String::new(),
+        })
+        .collect();
+        res.join(";")
+    }
 }
 
 impl Loadable<Record> for Buffer {
