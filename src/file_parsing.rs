@@ -56,17 +56,11 @@ impl Loadable<Record> for Buffer {
     }
 
     fn collection_to_string(collection: Vec<Vec<Option<String>>>) -> String {
-        let flatten_vec: Vec<Vec<String>> = collection
-        .into_iter()
-        .map(|r| r.into_iter().map(|r| match r {
-            Some(v) => v,
-            None => String::from(""),
-        }).collect())
+        let res: Vec<String> = collection.iter()
+        .map(Self::record_to_string)
         .collect();
-        let res: Vec<String> = flatten_vec.iter()
-        .map(|r| r.join(";"))
-        .collect();
-        res.join(";\n")
+
+        res.join("\n")
     }
 
     fn load_from_source(source_path: &str, source_type: SourceType) -> Result<Self, LoadingError> {
