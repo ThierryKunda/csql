@@ -106,3 +106,14 @@ impl Display for ExportError {
         }
     }
 }
+
+#[derive(Debug)]
+pub struct SerializeError;
+
+impl Error for SerializeError {}
+
+impl Display for SerializeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Failed serializing user query")
+    }
+}
