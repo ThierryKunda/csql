@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::errors::{CommitError, ExportError, LoadingError, QueryError};
+use crate::{errors::{CommitError, ExportError, LoadingError, QueryError, SerializeError}, commands::Command};
 
 type ColumnName = String;
 type Value = Option<String>;
@@ -76,4 +76,8 @@ where
 pub enum SourceType {
     LocalFile,
     Http,
+}
+
+pub trait Executable {
+    fn deserialize_as_command(&self) -> Result<Command, SerializeError>;
 }
