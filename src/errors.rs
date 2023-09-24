@@ -108,7 +108,11 @@ impl Display for ExportError {
 }
 
 #[derive(Debug)]
-pub struct SerializeError;
+pub enum SerializeError {
+    NotImplemented,
+    NotImplementable,
+    UselessToImplement,
+}
 
 impl Error for SerializeError {}
 
