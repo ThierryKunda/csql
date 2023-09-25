@@ -118,6 +118,6 @@ impl Error for SerializeError {}
 
 impl Display for SerializeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Failed serializing user query")
+        write!(f, "Failed serializing user query, reason : {:?}", self)
     }
 }
