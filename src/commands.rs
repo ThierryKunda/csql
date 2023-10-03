@@ -1,9 +1,9 @@
 use crate::{
     errors::SerializeError,
-    traits::{Condition, Executable},
+    traits::{Condition, Executable, Columns, Filtering, InsertElement},
 };
-use sqlparser::ast::Statement;
-use std::collections::HashMap;
+use sqlparser::ast::{Statement, SelectItem, SetExpr, Expr, TableFactor, Value, BinaryOperator};
+use std::{collections::HashMap, ops::Deref};
 
 pub enum Command {
     Select {
@@ -148,7 +148,6 @@ impl Executable for Statement {
                 table_name,
                 columns,
                 source,
-                table,
                 ..
             } => {
                 let _ident = table_name.0.get(0).ok_or(SerializeError::NotImplementable)?;
@@ -250,7 +249,6 @@ impl Executable for Statement {
             },
             Statement::Delete {
                 tables,
-                from,
                 selection,
                 ..
             } => {
