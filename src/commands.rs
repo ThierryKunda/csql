@@ -217,7 +217,16 @@ impl Executable for Statement {
                 from,
                 selection,
                 ..
-            } => todo!(),
+            } => {
+                let table = tables.first()
+                .ok_or(SerializeError::NotImplementable)?.0
+                .first()
+                .ok_or(SerializeError::NotImplementable)?
+                .value
+                .clone();
+            let conditions = selection.deserialize_conditions();
+            Ok(Command::Delete { table, conditions })
+            },
             _ => Err(SerializeError::UselessToImplement),
         }
     }
