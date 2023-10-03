@@ -105,7 +105,40 @@ impl Filtering for Option<Expr> {
 impl Executable for Statement {
     fn deserialize_as_command(&self) -> Result<Command, SerializeError> {
         match self {
-            Statement::Query(_) => todo!(),
+            Statement::Query(q) => {
+                let query = q.deref();
+                let body = query.body.deref();
+                let mut columns: Vec<String> = vec![];
+                let mut all_selected = false;
+                let mut table = String::new();
+                // let conditions = 
+                let mut _conditions = Ok(None);
+                match body {
+                    SetExpr::Select(s) => {
+                        let select = s.deref();
+                        _conditions = s.selection.deserialize_conditions();
+                        for proj in select.projection.iter() {
+                            match proj {
+                                SelectItem::UnnamedExpr(Expr::Identifier(ident)) => columns.push(ident.clone().value),
+                                SelectItem::Wildcard(_) => all_selected = true,
+                                _ => return Err(SerializeError::NotImplemented)
+                            }
+                        }
+                        let t = select.from.first().unwrap();
+                        if let TableFactor::Table { name, .. } = &t.relation {
+                            let n = &name.0;
+                            table = n.first().unwrap().value.clone()
+                        }
+                    },
+                    _ => return Err(SerializeError::UselessToImplement)
+                }
+                // Ok(Command::Select { table, columns, conditions })
+                if all_selected {
+                    Ok(Command::Select { table, columns: Columns::All, conditions: _conditions })
+                } else {
+                    Ok(Command::Select { table, columns: Columns::ColumnNames(columns), conditions: _conditions })
+                }
+            },
             Statement::Insert {
                 table_name,
                 columns,
