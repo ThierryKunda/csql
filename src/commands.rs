@@ -145,7 +145,67 @@ impl Executable for Statement {
                 source,
                 table,
                 ..
-            } => todo!(),
+            } => {
+                let _ident = table_name.0.get(0).ok_or(SerializeError::NotImplementable)?;
+                let table = _ident.value.clone();
+                let mut elements: InsertElement = InsertElement::PlainValues(vec![]);
+                if columns.len() == 0 {
+                    let mut plain_values: Vec<Option<String>> = Vec::new();
+                    match source.deref().body.deref() {
+                        SetExpr::Values(vals) => {
+                            let unique_line = vals.rows.first().ok_or(SerializeError::NotImplementable)?;
+                            for expr in unique_line.iter() {
+                                match expr {
+                                    Expr::Value(v) => match v {
+                                        Value::Boolean(b) => if *b {
+                                            plain_values.push(Some(String::from("true")));
+                                        } else {
+                                            plain_values.push(Some(String::from("false")));
+                                        },
+                                        Value::Number(nb, _) => plain_values.push(Some(nb.clone())),
+                                        Value::SingleQuotedString(s)
+                                        | Value::DoubleQuotedString(s) => plain_values.push(Some(s.clone())),
+                                        Value::Null => plain_values.push(None),
+                                        _ => return Err(SerializeError::NotImplemented),
+                                    },
+                                    _ => return Err(SerializeError::NotImplementable),
+                                }
+                            }
+                        },
+                        _ => return Err(SerializeError::NotImplementable),
+                    }
+                    elements = InsertElement::PlainValues(plain_values);       
+                } else {
+                    let mut mapped_values: HashMap<String, Option<String>> = HashMap::new();
+                    match source.deref().body.deref() {
+                            SetExpr::Values(vals) => {
+                                let unique_line = vals.rows.first().ok_or(SerializeError::NotImplementable)?;
+                                for i in 0..vals.rows.len() {
+                                    match (columns.get(i), unique_line.get(i)) {
+                                        (Some(ident), Some(expr)) => match expr {
+                                            Expr::Value(v) => match v {
+                                                Value::Boolean(b) => if *b {
+                                                    mapped_values.insert(ident.value.clone(), Some(String::from("true")));
+                                                } else {
+                                                    mapped_values.insert(ident.value.clone(), Some(String::from("false")));
+                                                },
+                                                Value::Number(nb, _) => { mapped_values.insert(ident.value.clone(), Some(nb.clone())); },
+                                                Value::SingleQuotedString(s)
+                                                | Value::DoubleQuotedString(s) => {mapped_values.insert(ident.value.clone(), Some(s.clone()));},
+                                                Value::Null =>{ mapped_values.insert(ident.value.clone(), None); },
+                                                _ => return Err(SerializeError::NotImplemented),
+                                            },
+                                            _ => return Err(SerializeError::NotImplementable),
+                                        },
+                                        _ => return Err(SerializeError::NotImplementable),
+                                    }
+                                }
+                            },
+                            _ => return Err(SerializeError::NotImplementable),
+                    }
+                }
+                Ok(Command::Insert { table, elements })
+            },
             Statement::Update {
                 table,
                 assignments,
