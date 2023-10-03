@@ -8,15 +8,20 @@ use std::collections::HashMap;
 pub enum Command {
     Select {
         table: String,
-        columns: Vec<String>,
-        conditions: Option<Vec<Condition>>,
+        columns: Columns,
+        conditions: Result<Option<Condition>, SerializeError>,
     },
     Update {
         table: String,
-        updates: HashMap<String, String>,
-        conditions: Option<Vec<Condition>>,
+        updates: HashMap<String, Option<String>>,
+        conditions: Result<Option<Condition>, SerializeError>,
+    },
+    Insert {
+        table: String,
+        elements: InsertElement,
     },
     Delete {
+        table: String,
         conditions: Result<Option<Condition>, SerializeError>,
     },
 }
