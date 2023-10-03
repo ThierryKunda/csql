@@ -211,7 +211,38 @@ impl Executable for Statement {
                 assignments,
                 selection,
                 ..
-            } => todo!(),
+            } => {
+                let table = if let TableFactor::Table { name, .. } = &table.relation {
+                    Ok(name.0
+                    .get(0)
+                    .ok_or(SerializeError::NotImplementable)?
+                    .value
+                    .clone())
+                } else {
+                    Err(SerializeError::NotImplementable)
+                }?;
+                let conditions = selection.deserialize_conditions();
+                let mut updates = HashMap::new();
+                for ass in assignments.iter() {
+                    let attr_name = ass.id.first().ok_or(SerializeError::NotImplementable)?.value.clone();
+                    match &ass.value {
+                        Expr::Value(v) => match v {
+                            Value::Boolean(b) => if *b {
+                                updates.insert(attr_name, Some(String::from("true")));
+                            } else {
+                                updates.insert(attr_name, Some(String::from("false")));
+                            },
+                            Value::Number(nb, _) => { updates.insert(attr_name, Some(nb.clone())); },
+                            Value::SingleQuotedString(s)
+                            | Value::DoubleQuotedString(s) => { updates.insert(attr_name, Some(s.clone())); },
+                            Value::Null => { updates.insert(attr_name, None); },
+                            _ => return Err(SerializeError::NotImplemented),
+                        },
+                        _ => return Err(SerializeError::NotImplementable),
+                    }
+                } 
+            Ok(Command::Update {table, updates, conditions })
+            },
             Statement::Delete {
                 tables,
                 from,
