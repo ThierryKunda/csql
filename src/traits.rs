@@ -78,6 +78,10 @@ pub enum SourceType {
     Http,
 }
 
+pub trait Filtering {
+    fn deserialize_conditions(&self) -> Result<Option<Condition>, SerializeError>;
+}
+
 pub trait Executable {
     fn deserialize_as_command(&self) -> Result<Command, SerializeError>;
 }
