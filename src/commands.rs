@@ -1,6 +1,6 @@
 use crate::{
     errors::SerializeError,
-    traits::{Condition, Executable, Columns, Filtering, InsertElement},
+    traits::{Condition, Executable, Columns, Filtering, InsertElement, Value as Val},
 };
 use sqlparser::ast::{Statement, SelectItem, SetExpr, Expr, TableFactor, Value, BinaryOperator};
 use std::{collections::HashMap, ops::Deref};
@@ -13,7 +13,7 @@ pub enum Command {
     },
     Update {
         table: String,
-        updates: HashMap<String, Option<String>>,
+        updates: HashMap<String, Val>,
         conditions: Result<Option<Condition>, SerializeError>,
     },
     Insert {
@@ -154,7 +154,7 @@ impl Executable for Statement {
                 let table = _ident.value.clone();
                 let mut elements: InsertElement = InsertElement::PlainValues(vec![]);
                 if columns.len() == 0 {
-                    let mut plain_values: Vec<Option<String>> = Vec::new();
+                    let mut plain_values: Vec<Val> = Vec::new();
                     match source.deref().body.deref() {
                         SetExpr::Values(vals) => {
                             let unique_line = vals.rows.first().ok_or(SerializeError::NotImplementable)?;
@@ -180,7 +180,7 @@ impl Executable for Statement {
                     }
                     elements = InsertElement::PlainValues(plain_values);       
                 } else {
-                    let mut mapped_values: HashMap<String, Option<String>> = HashMap::new();
+                    let mut mapped_values: HashMap<String, Val> = HashMap::new();
                     match source.deref().body.deref() {
                             SetExpr::Values(vals) => {
                                 let unique_line = vals.rows.first().ok_or(SerializeError::NotImplementable)?;

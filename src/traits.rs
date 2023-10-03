@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{errors::{CommitError, ExportError, LoadingError, QueryError, SerializeError}, commands::Command};
 
 type ColumnName = String;
-type Value = Option<String>;
+pub type Value = Option<String>;
 pub trait Queryable<T: Recordable> {
     fn bulk_load_data(&mut self, data: &Vec<Vec<Value>>) -> Result<(), LoadingError> {
         for r in data {
