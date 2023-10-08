@@ -36,8 +36,29 @@ fn parsing_update() -> Result<(), ParserError> {
 }
 
 #[test]
-fn parsing_insert() {
-    
+fn parsing_insert() -> Result<(), ParserError> {
+    let dialect = GenericDialect {};
+    let sql = "
+    insert into user values ('john', 'doe', 'john.doe@example.com', 'abcd1234');
+    insert into user (
+        firstname,
+        lastname,
+        email,
+        password
+    ) values (
+        'john',
+        'doe',
+        'john.doe@example.com',
+        'abcd1234'
+    );";
+    let statements = Parser::parse_sql(&dialect, sql)?;
+    let commands: Result<Vec<_>, _> = statements.iter()
+    .map(|st| st.deserialize_as_command())
+    .collect();
+    if let Ok(comms) = &commands {
+        comms.iter().for_each(|c| println!("{:?}", c))
+    }
+    Ok(())
 }
 
 #[test]
