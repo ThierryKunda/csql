@@ -240,3 +240,70 @@ impl Queryable<Record> for Table<Record> {
         }
     }
 }
+
+
+pub struct Directory {
+    name: String,
+    path: PathBuf,
+    buffers: Vec<Buffer>,
+}
+
+impl Directory {
+    pub fn new(path: String) -> Result<Self, LoadingError> {
+        let p_obj = Path::new(path.as_str())
+        .canonicalize()
+        .map_err(|_| LoadingError::FailedFileLoading(std::io::ErrorKind::NotFound))?;
+        let name = p_obj.file_name()
+        .ok_or(LoadingError::FailedFileLoading(std::io::ErrorKind::NotFound))?
+        .to_str()
+        .ok_or(LoadingError::FailedFileLoading(std::io::ErrorKind::NotFound))?
+        .to_string();
+        Ok(Self { name, path: p_obj, buffers: vec![] })
+    }
+
+    pub fn list_files(&self) -> Result<Vec<DirEntry>, LoadingError> {
+        let mut res = Vec::new();
+        for entry in self.path.read_dir()
+            .map_err(|_| LoadingError::FailedFileLoading(std::io::ErrorKind::NotFound))? {
+            if let Ok(e) = entry {
+                res.push(e);
+            } else {
+                return Err(LoadingError::FailedFileLoading(std::io::ErrorKind::Other));
+            }
+        }
+        Ok(res)
+    }
+
+    pub fn list_data_files(&self) -> Result<Vec<DirEntry>, LoadingError> {
+        let files = self.list_files()?;
+        let res: Vec<DirEntry> = files.into_iter()
+        .filter_map(|dir_e| {
+            let path = dir_e.path();
+            let ext = path.extension()?;
+            let ext_as_str = ext.to_str()?;
+            if ext_as_str == "csv" {
+                Some(dir_e)
+            } else {
+                None
+            }
+        })
+        .collect();
+        Ok(res)
+    }
+
+    // pub fn get_confi
+}
+
+impl Storage for Directory {
+    fn bulk_data(&self) -> Result<Vec<Vec<Value>>, LoadingError> {
+        todo!()
+    }
+
+    fn dump_data(&self) -> Result<(), LoadingError> {
+        todo!()
+    }
+
+    fn commit(&self) -> Result<(), LoadingError> {
+        todo!()
+    }
+}
