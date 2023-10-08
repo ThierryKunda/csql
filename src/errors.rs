@@ -80,6 +80,7 @@ pub enum LoadingError {
     InvalidRecord(String),
     SourceNotImplemented,
     FailedFileLoading(ErrorKind),
+    SourceNotListed,
 }
 
 impl Error for LoadingError {}
