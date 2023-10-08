@@ -1,9 +1,9 @@
 use crate::{
     errors::{QueryError, TableInitError, LoadingError},
-    traits::{Queryable, Columns, Recordable, Condition, InsertElement, Data},
+    traits::{Queryable, Columns, Recordable, Condition, InsertElement, Data, Storage, Loadable}, file_parsing::Buffer,
 };
 use crate::utils::Value;
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, rc::Rc, path::{Path, PathBuf}, fs::DirEntry};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Table<T>
@@ -262,7 +262,7 @@ impl Directory {
         .to_str()
         .ok_or(LoadingError::FailedFileLoading(std::io::ErrorKind::NotFound))?
         .to_string();
-        Ok(Self { name, path: p_obj, buffers: vec![] })
+        Ok(Self { name, path: p_obj, buffers: HashMap::new() })
     }
 
     pub fn list_files(&self) -> Result<Vec<DirEntry>, LoadingError> {
@@ -313,15 +313,19 @@ impl Directory {
 }
 
 impl Storage for Directory {
-    fn bulk_data(&self) -> Result<Vec<Vec<Value>>, LoadingError> {
+    fn bulk_data(&self, section_name: String) -> Result<Vec<Vec<Value>>, LoadingError> {
         todo!()
     }
 
-    fn dump_data(&self) -> Result<(), LoadingError> {
+    fn dump_data(&self, section_name: String) -> Result<(), LoadingError> {
         todo!()
     }
 
-    fn commit(&self) -> Result<(), LoadingError> {
+    fn commit(&self, section_name: String) -> Result<(), LoadingError> {
+        todo!()
+    }
+
+    fn commit_all(&self) -> Result<(), LoadingError> {
         todo!()
     }
 }
