@@ -8,7 +8,7 @@ use csql::traits::{Queryable, Loadable, Columns, Condition, SourceType, Data};
 
 #[test]
 fn apply_select() -> Result<(), TableInitError> {
-    let buf = Buffer::new(Source::FilePath(String::from("samples/example0.csv")));
+    let buf = Buffer::new(Source::FilePath(String::from("samples/example1.csv")));
     let mut t = Table::new(None, &vec!["one", "two", "three"])?;
     t.bulk_load_data(&buf.bulk_data(3).unwrap()).unwrap();
     let expected: Vec<Vec<Option<String>>> = vec![
@@ -26,7 +26,7 @@ fn apply_select() -> Result<(), TableInitError> {
 
 #[test]
 fn dump_data_test() -> Result<(), TableInitError> {
-    let buf = Buffer::load_from_source("samples/example0.csv", SourceType::LocalFile).unwrap();
+    let buf = Buffer::load_from_source("samples/example1.csv", SourceType::LocalFile).unwrap();
     let mut t = Table::new(None, &vec!["one", "two", "three"])?;
     t.bulk_load_data(&buf.bulk_data(3).unwrap()).unwrap();
     t.delete(&Some(Condition::Equal(String::from("one"), String::from("a")))).unwrap();
