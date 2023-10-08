@@ -291,7 +291,16 @@ impl Directory {
         Ok(res)
     }
 
-    // pub fn get_confi
+    pub fn load_buffers(&mut self) -> Result<(), LoadingError> {
+        for e in self.list_data_files()? {
+            let p = e.path();
+            let source_path = p.to_str()
+            .ok_or(LoadingError::FailedFileLoading(std::io::ErrorKind::Other))?;
+            let source_type = crate::traits::SourceType::LocalFile;
+            self.buffers.push(Buffer::load_from_source(source_path, source_type)?);
+        }
+        Ok(())
+    }
 }
 
 impl Storage for Directory {
