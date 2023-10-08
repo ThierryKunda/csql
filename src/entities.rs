@@ -1,9 +1,11 @@
 use crate::{
-    errors::{QueryError, TableInitError, LoadingError},
+    errors::{QueryError, TableInitError, LoadingError, ExportError},
     traits::{Queryable, Columns, Recordable, Condition, InsertElement, Data, Storage, Loadable}, file_parsing::Buffer,
 };
 use crate::utils::Value;
-use std::{collections::HashMap, rc::Rc, path::{Path, PathBuf}, fs::DirEntry};
+use std::{collections::HashMap, rc::Rc, path::{Path, PathBuf}, fs::{DirEntry, File}, io::{Read, BufReader}};
+
+use serde::{Serialize, Deserialize};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Table<T>
