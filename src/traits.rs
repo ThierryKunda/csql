@@ -1,18 +1,14 @@
 use std::collections::HashMap;
 
-use crate::{errors::{CommitError, ExportError, LoadingError, QueryError, SerializeError}, commands::Command};
+use crate::{errors::{CommitError, ExportError, LoadingError, QueryError, SerializeError}, commands::Command, utils::Value};
+
+pub trait Data: Sized {
+    fn bulk_load_data(&mut self, data: &Vec<Vec<Value>>) -> Result<(), LoadingError>;
+    fn get_records_as_collection(&self) -> Vec<Vec<Value>>;
+}
 
 type ColumnName = String;
-pub type Value = Option<String>;
 pub trait Queryable<T: Recordable> {
-    fn bulk_load_data(&mut self, data: &Vec<Vec<Value>>) -> Result<(), LoadingError> {
-        for r in data {
-            if let Err(_) = self.insert(InsertElement::PlainValues(r.clone())) {
-                return Err(LoadingError::InvalidRecord(String::new()));
-            }
-        }
-        Ok(())
-    }
     fn select(
         &self,
         attributes_names: Columns,
@@ -25,7 +21,6 @@ pub trait Queryable<T: Recordable> {
         conditions: &Option<Condition>,
     ) -> Result<(), QueryError>;
     fn insert(&mut self, new_record: InsertElement) -> Result<(), QueryError>;
-    fn get_records_as_collection(&self) -> Vec<Vec<Value>>;
 }
 
 pub trait Recordable: Sized {
@@ -67,8 +62,8 @@ where
     fn load_from_source(source_path: &str, source_type: SourceType) -> Result<Self, LoadingError>;
     fn bulk_data(&self, columns_amount: usize) -> Result<Vec<Vec<Value>>, LoadingError>;
     fn dump_data(&self, data: Vec<Vec<Value>>) -> Result<(), ExportError>;
-    fn commit(&mut self, query_subject: &impl Queryable<T>) -> Result<(), CommitError> {
-        self.dump_data(query_subject.get_records_as_collection())
+    fn commit(&mut self, new_data: &impl Data) -> Result<(), CommitError> {
+        self.dump_data(new_data.get_records_as_collection())
             .map_err(|_| CommitError)
     }
 }

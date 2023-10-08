@@ -133,6 +133,23 @@ impl Table<Record> {
     }
 }
 
+impl Data for Table<Record> {
+    fn bulk_load_data(&mut self, data: &Vec<Vec<Value>>) -> Result<(), LoadingError> {
+        for r in data {
+            if let Err(_) = self.insert(InsertElement::PlainValues(r.clone())) {
+                return Err(LoadingError::InvalidRecord(String::new()));
+            }
+        }
+        Ok(())
+    }
+    
+    fn get_records_as_collection(&self) -> Vec<Vec<Option<String>>> {
+        self.records.iter()
+        .map(|r| r.get_record_as_collection())
+        .collect()
+    }
+}
+
 impl Queryable<Record> for Table<Record> {
     fn select(
         &self,
@@ -221,11 +238,5 @@ impl Queryable<Record> for Table<Record> {
                 Ok(())
             },
         }
-    }
-    
-    fn get_records_as_collection(&self) -> Vec<Vec<Option<String>>> {
-        self.records.iter()
-        .map(|r| r.get_record_as_collection())
-        .collect()
     }
 }
