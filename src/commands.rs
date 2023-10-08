@@ -6,6 +6,7 @@ use crate::utils::Value as Val;
 use sqlparser::ast::{Statement, SelectItem, SetExpr, Expr, TableFactor, Value, BinaryOperator};
 use std::{collections::HashMap, ops::Deref};
 
+#[derive(Debug)]
 pub enum Command {
     Select {
         tables: Vec<String>,
@@ -44,7 +45,7 @@ impl Filtering for Option<Expr> {
                         Expr::Value(Value::Number(n1, _)),
                         Expr::Value(Value::Number(n2, _))
                     ) => Ok(Some(Condition::Equal(n1.clone(), n2.clone()))),
-                    _ => Err(SerializeError::NotImplemented),
+                    _ => Err(SerializeError::NotImplemented(String::from(""))),
                 },
                 BinaryOperator::Gt => match (left.deref(), right.deref()) {
                     (
@@ -59,7 +60,10 @@ impl Filtering for Option<Expr> {
                         Expr::Value(Value::Number(n1, _)),
                         Expr::Value(Value::Number(n2, _))
                     ) => Ok(Some(Condition::GreaterThan(n1.clone(), n2.clone()))),
-                    _ => Err(SerializeError::NotImplemented),
+                    _ => {
+                        println!("Operator = {:?}", self);
+                        Err(SerializeError::NotImplemented(String::from("Types not compatible for comparison with operator '>'")))
+                    },
                 },
                 BinaryOperator::Lt => match (left.deref(), right.deref()) {
                     (
@@ -74,7 +78,7 @@ impl Filtering for Option<Expr> {
                         Expr::Value(Value::Number(n1, _)),
                         Expr::Value(Value::Number(n2, _))
                     ) => Ok(Some(Condition::LessThan(n1.clone(), n2.clone()))),
-                    _ => Err(SerializeError::NotImplemented),
+                    _ => Err(SerializeError::NotImplemented(String::from(format!("Expression '{:?}' can not be used for conditions", self)))),
                 },
                 BinaryOperator::And => match (
                     Self::deserialize_conditions(&Some(left.deref().clone()))?,
@@ -100,10 +104,10 @@ impl Filtering for Option<Expr> {
                     (Some(cond), None) => Ok(Some(cond)),
                     (None, None) => Ok(None),
                 },
-                _ => Err(SerializeError::NotImplemented)
+                _ => Err(SerializeError::NotImplemented(String::from("Combination of comparisons not compatible with operator 'or'")))
             },
             None => Ok(None),
-            _ => Err(SerializeError::NotImplemented),
+            _ => Err(SerializeError::NotImplemented(String::from("Types not compatible for comparison"))),
         }
     }
 }
@@ -127,7 +131,7 @@ impl Executable for Statement {
                             match proj {
                                 SelectItem::UnnamedExpr(Expr::Identifier(ident)) => columns.push(ident.clone().value),
                                 SelectItem::Wildcard(_) => all_selected = true,
-                                _ => return Err(SerializeError::NotImplemented)
+                                _ => return Err(SerializeError::NotImplemented(String::from("Only identifiers and aliases are implemented")))
                             }
                         }
                         for t in &select.from {
@@ -173,7 +177,7 @@ impl Executable for Statement {
                                         Value::SingleQuotedString(s)
                                         | Value::DoubleQuotedString(s) => plain_values.push(Some(s.clone())),
                                         Value::Null => plain_values.push(None),
-                                        _ => return Err(SerializeError::NotImplemented),
+                                        _ => return Err(SerializeError::NotImplemented(String::from(format!("Type not implemented for the value : {:?}", v)))),
                                     },
                                     _ => return Err(SerializeError::NotImplementable),
                                 }
@@ -200,7 +204,7 @@ impl Executable for Statement {
                                                 Value::SingleQuotedString(s)
                                                 | Value::DoubleQuotedString(s) => {mapped_values.insert(ident.value.clone(), Some(s.clone()));},
                                                 Value::Null =>{ mapped_values.insert(ident.value.clone(), None); },
-                                                _ => return Err(SerializeError::NotImplemented),
+                                                _ => return Err(SerializeError::NotImplemented(String::from(format!("Type not implemented for the value : {:?}", v)))),
                                             },
                                             _ => return Err(SerializeError::NotImplementable),
                                         },
@@ -243,7 +247,7 @@ impl Executable for Statement {
                             Value::SingleQuotedString(s)
                             | Value::DoubleQuotedString(s) => { updates.insert(attr_name, Some(s.clone())); },
                             Value::Null => { updates.insert(attr_name, None); },
-                            _ => return Err(SerializeError::NotImplemented),
+                            _ => return Err(SerializeError::NotImplemented(String::from(format!("Type not implemented for the value : {:?}", &ass.value)))),
                         },
                         _ => return Err(SerializeError::NotImplementable),
                     }

@@ -109,7 +109,7 @@ impl Display for ExportError {
 
 #[derive(Debug)]
 pub enum SerializeError {
-    NotImplemented,
+    NotImplemented(String),
     NotImplementable,
     UselessToImplement,
 }
