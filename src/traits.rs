@@ -83,3 +83,9 @@ pub trait Filtering {
 pub trait Executable {
     fn deserialize_as_command(&self) -> Result<Command, SerializeError>;
 }
+
+pub trait Storage {
+    fn bulk_data(&self) -> Result<Vec<Vec<Value>>, LoadingError>;
+    fn dump_data(&self) -> Result<(), LoadingError>;
+    fn commit(&self) -> Result<(), LoadingError>;
+}
