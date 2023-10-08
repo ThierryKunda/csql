@@ -32,6 +32,7 @@ pub trait Recordable: Sized {
     fn satisfy_conditions(&self, cond: &Condition) -> Result<bool, QueryError>;
 }
 
+#[derive(Debug)]
 pub enum Condition {
     Equal(String, String),
     GreaterThan(String, String),
@@ -40,11 +41,13 @@ pub enum Condition {
     And(Box<Condition>, Box<Condition>),
 }
 
+#[derive(Debug)]
 pub enum Columns {
     All,
     ColumnNames(Vec<String>),
 }
 
+#[derive(Debug)]
 pub enum InsertElement {
     PlainValues(Vec<Value>),
     MappedValues(HashMap<ColumnName, Value>),
