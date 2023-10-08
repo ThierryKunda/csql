@@ -311,6 +311,26 @@ impl Directory {
         }
         Ok(())
     }
+
+    fn get_config_file(&self) -> Result<DirEntry, LoadingError> {
+        let files = self.list_files()?;
+        for f in files {
+            if f.file_name().to_str() == Some("config.json") {
+                return Ok(f);
+            }
+        }
+        Err(LoadingError::FailedFileLoading(std::io::ErrorKind::NotFound))
+    }
+
+    pub fn get_config(&self) -> Result<Config, LoadingError> {
+        let conf_file = self.get_config_file()?;
+        let f = File::open(conf_file.path())
+        .map_err(|e| LoadingError::FailedFileLoading(e.kind()))?;
+        let buf = BufReader::new(f);
+        let config: Result<Config, serde_json::Error> = serde_json::from_reader(buf);
+        println!("config = {:?}", config);
+        config.map_err(|_| LoadingError::FailedFileLoading(std::io::ErrorKind::Other))
+    }
 }
 
 impl Storage for Directory {
