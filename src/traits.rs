@@ -85,7 +85,8 @@ pub trait Executable {
 }
 
 pub trait Storage {
-    fn bulk_data(&self) -> Result<Vec<Vec<Value>>, LoadingError>;
-    fn dump_data(&self) -> Result<(), LoadingError>;
-    fn commit(&self) -> Result<(), LoadingError>;
+    fn bulk_data(&self, section_name: String) -> Result<Vec<Vec<Value>>, LoadingError>;
+    fn dump_data(&self, section_name: String) -> Result<(), LoadingError>;
+    fn commit(&self, section_name: String) -> Result<(), LoadingError>;
+    fn commit_all(&self) -> Result<(), LoadingError>;
 }
