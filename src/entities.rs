@@ -241,8 +241,9 @@ impl Queryable<Record> for Table<Record> {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
-    data_filepaths: Vec<String>,
+    data_filepaths: Option<Vec<String>>,
     aliases: HashMap<String, String>
 }
 
