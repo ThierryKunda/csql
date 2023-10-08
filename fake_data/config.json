@@ -1,0 +1,11 @@
+{
+    "data_filepaths": [
+        "./fake_data/following.csv",
+        "./fake_data/user.csv",
+        "./fake_data/post.csv"
+    ],
+    "aliases": {
+        "following": "network",
+        "user": "people"
+    }
+}
