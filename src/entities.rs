@@ -245,7 +245,7 @@ impl Queryable<Record> for Table<Record> {
 pub struct Directory {
     name: String,
     path: PathBuf,
-    buffers: Vec<Buffer>,
+    buffers: HashMap<String, Buffer>,
 }
 
 impl Directory {
