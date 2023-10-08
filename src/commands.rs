@@ -2,6 +2,7 @@ use crate::{
     errors::SerializeError,
     traits::{Condition, Executable, Columns, Filtering, InsertElement, Value as Val},
 };
+use crate::utils::Value as Val;
 use sqlparser::ast::{Statement, SelectItem, SetExpr, Expr, TableFactor, Value, BinaryOperator};
 use std::{collections::HashMap, ops::Deref};
 

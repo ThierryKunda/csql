@@ -2,6 +2,7 @@ use crate::{
     errors::{QueryError, TableInitError},
     traits::{Queryable, Columns, Recordable, Condition, InsertElement},
 };
+use crate::utils::Value;
 use std::{collections::HashMap, rc::Rc};
 
 #[derive(Debug, PartialEq, Eq)]
