@@ -334,19 +334,19 @@ impl Directory {
 }
 
 impl Storage for Directory {
-    fn bulk_data(&self, section_name: String) -> Result<Vec<Vec<Value>>, LoadingError> {
-        todo!()
+    fn bulk_data(&self, section_name: &String, columns_amount: usize) -> Result<Vec<Vec<Value>>, LoadingError> {
+        let buf = self.buffers.get(section_name);
+        match buf {
+            Some(b) => b.bulk_data(columns_amount),
+            None => Err(LoadingError::SourceNotListed),
+        }
     }
 
-    fn dump_data(&self, section_name: String) -> Result<(), LoadingError> {
-        todo!()
-    }
-
-    fn commit(&self, section_name: String) -> Result<(), LoadingError> {
-        todo!()
-    }
-
-    fn commit_all(&self) -> Result<(), LoadingError> {
-        todo!()
+    fn dump_data(&self, section_name: &String, data: Vec<Vec<Value>>) -> Result<(), ExportError> {
+        let buf = self.buffers.get(section_name);
+        match buf {
+            Some(b) => b.dump_data(data),
+            None => Err(ExportError::ResourceNotFound),
+        }
     }
 }
