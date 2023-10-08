@@ -294,10 +294,15 @@ impl Directory {
     pub fn load_buffers(&mut self) -> Result<(), LoadingError> {
         for e in self.list_data_files()? {
             let p = e.path();
+            let file_name = e.file_name()
+            .to_str()
+            .ok_or(LoadingError::FailedFileLoading(std::io::ErrorKind::Other))?
+            .to_string()
+            .replace(".csv", "");
             let source_path = p.to_str()
             .ok_or(LoadingError::FailedFileLoading(std::io::ErrorKind::Other))?;
             let source_type = crate::traits::SourceType::LocalFile;
-            self.buffers.push(Buffer::load_from_source(source_path, source_type)?);
+            self.buffers.insert(file_name, Buffer::load_from_source(source_path, source_type)?);
         }
         Ok(())
     }
