@@ -1,6 +1,6 @@
 use crate::{
     errors::SerializeError,
-    traits::{Condition, Executable, Columns, Filtering, InsertElement, Value as Val},
+    traits::{Condition, Executable, Columns, Filtering, InsertElement},
 };
 use crate::utils::Value as Val;
 use sqlparser::ast::{Statement, SelectItem, SetExpr, Expr, TableFactor, Value, BinaryOperator};
@@ -8,7 +8,7 @@ use std::{collections::HashMap, ops::Deref};
 
 pub enum Command {
     Select {
-        table: String,
+        tables: Vec<String>,
         columns: Columns,
         conditions: Result<Option<Condition>, SerializeError>,
     },
@@ -116,7 +116,7 @@ impl Executable for Statement {
                 let body = query.body.deref();
                 let mut columns: Vec<String> = vec![];
                 let mut all_selected = false;
-                let mut table = String::new();
+                let mut tables = vec![];
                 // let conditions = 
                 let mut _conditions = Ok(None);
                 match body {
@@ -132,17 +132,19 @@ impl Executable for Statement {
                         }
                         let t = select.from.first().unwrap();
                         if let TableFactor::Table { name, .. } = &t.relation {
-                            let n = &name.0;
-                            table = n.first().unwrap().value.clone()
+                            let idents = &name.0;
+                            tables = idents.iter()
+                            .map(|ident| ident.value.clone())
+                            .collect()
                         }
                     },
                     _ => return Err(SerializeError::UselessToImplement)
                 }
                 // Ok(Command::Select { table, columns, conditions })
                 if all_selected {
-                    Ok(Command::Select { table, columns: Columns::All, conditions: _conditions })
+                    Ok(Command::Select { tables, columns: Columns::All, conditions: _conditions })
                 } else {
-                    Ok(Command::Select { table, columns: Columns::ColumnNames(columns), conditions: _conditions })
+                    Ok(Command::Select { tables, columns: Columns::ColumnNames(columns), conditions: _conditions })
                 }
             },
             Statement::Insert {
