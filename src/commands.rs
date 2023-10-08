@@ -181,7 +181,7 @@ impl Executable for Statement {
             } => {
                 let _ident = table_name.0.get(0).ok_or(SerializeError::NotImplementable)?;
                 let table = _ident.value.clone();
-                let mut elements: InsertElement = InsertElement::PlainValues(vec![]);
+                let mut _elements: InsertElement = InsertElement::PlainValues(vec![]);
                 if columns.len() == 0 {
                     let mut plain_values: Vec<Val> = Vec::new();
                     match source.deref().body.deref() {
@@ -207,13 +207,13 @@ impl Executable for Statement {
                         },
                         _ => return Err(SerializeError::NotImplementable),
                     }
-                    elements = InsertElement::PlainValues(plain_values);       
+                    _elements = InsertElement::PlainValues(plain_values);       
                 } else {
                     let mut mapped_values: HashMap<String, Val> = HashMap::new();
                     match source.deref().body.deref() {
                             SetExpr::Values(vals) => {
                                 let unique_line = vals.rows.first().ok_or(SerializeError::NotImplementable)?;
-                                for i in 0..vals.rows.len() {
+                                for i in 0..unique_line.len() {
                                     match (columns.get(i), unique_line.get(i)) {
                                         (Some(ident), Some(expr)) => match expr {
                                             Expr::Value(v) => match v {
@@ -236,8 +236,9 @@ impl Executable for Statement {
                             },
                             _ => return Err(SerializeError::NotImplementable),
                     }
+                    _elements = InsertElement::MappedValues(mapped_values);
                 }
-                Ok(Command::Insert { table, elements })
+                Ok(Command::Insert { table, elements: _elements })
             },
             Statement::Update {
                 table,
