@@ -4,7 +4,7 @@ use csql::errors::TableInitError;
 
 use csql::file_parsing::{Buffer, Source};
 
-use csql::traits::{Queryable, Loadable, Columns, Condition, SourceType};
+use csql::traits::{Queryable, Loadable, Columns, Condition, SourceType, Data};
 
 #[test]
 fn apply_select() -> Result<(), TableInitError> {
