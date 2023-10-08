@@ -34,55 +34,77 @@ impl Filtering for Option<Expr> {
             Some(Expr::BinaryOp { left, op, right }) => match op {
                 BinaryOperator::Eq => match (left.deref(), right.deref()) {
                     (
-                        Expr::Value(Value::SingleQuotedString(s1)),
-                        Expr::Value(Value::SingleQuotedString(s2))
-                    ) => Ok(Some(Condition::Equal(s1.clone(), s2.clone()))),
+                        Expr::Identifier(ident),
+                        Expr::Value(Value::SingleQuotedString(s))
+                    ) |
                     (
-                        Expr::Value(Value::DoubleQuotedString(s1)),
-                        Expr::Value(Value::DoubleQuotedString(s2)),
-                    ) => Ok(Some(Condition::Equal(s1.clone(), s2.clone()))),
+                        Expr::Value(Value::SingleQuotedString(s)),
+                        Expr::Identifier(ident),
+                    ) => Ok(Some(Condition::Equal(ident.value.clone(), s.clone()))),
                     (
-                        Expr::Value(Value::Number(n1, _)),
+                        Expr::Identifier(ident),
+                        Expr::Value(Value::DoubleQuotedString(s))
+                    ) |
+                    (
+                        Expr::Value(Value::DoubleQuotedString(s)),
+                        Expr::Identifier(ident),
+                    ) => Ok(Some(Condition::Equal(ident.value.clone(), s.clone()))),
+                    (
+                        Expr::Identifier(ident),
                         Expr::Value(Value::Number(n2, _))
-                    ) => Ok(Some(Condition::Equal(n1.clone(), n2.clone()))),
-                    _ => Err(SerializeError::NotImplemented(String::from(""))),
+                    ) => Ok(Some(Condition::Equal(ident.value.clone(), n2.clone()))),
+                    _ => Err(SerializeError::NotImplemented(String::from("Types not compatible for comparison with operator '='"))),
                 },
                 BinaryOperator::Gt => match (left.deref(), right.deref()) {
                     (
-                        Expr::Value(Value::SingleQuotedString(s1)),
-                        Expr::Value(Value::SingleQuotedString(s2))
-                    ) => Ok(Some(Condition::GreaterThan(s1.clone(), s2.clone()))),
+                        Expr::Identifier(ident),
+                        Expr::Value(Value::SingleQuotedString(s))
+                    ) |
                     (
-                        Expr::Value(Value::DoubleQuotedString(s1)),
-                        Expr::Value(Value::DoubleQuotedString(s2)),
-                    ) => Ok(Some(Condition::GreaterThan(s1.clone(), s2.clone()))),
+                        Expr::Value(Value::SingleQuotedString(s)),
+                        Expr::Identifier(ident),
+                    ) => Ok(Some(Condition::GreaterThan(ident.value.clone(), s.clone()))),
                     (
-                        Expr::Value(Value::Number(n1, _)),
+                        Expr::Identifier(ident),
+                        Expr::Value(Value::DoubleQuotedString(s))
+                    ) |
+                    (
+                        Expr::Value(Value::DoubleQuotedString(s)),
+                        Expr::Identifier(ident),
+                    ) => Ok(Some(Condition::GreaterThan(ident.value.clone(), s.clone()))),
+                    (
+                        Expr::Identifier(ident),
                         Expr::Value(Value::Number(n2, _))
-                    ) => Ok(Some(Condition::GreaterThan(n1.clone(), n2.clone()))),
-                    _ => {
-                        println!("Operator = {:?}", self);
-                        Err(SerializeError::NotImplemented(String::from("Types not compatible for comparison with operator '>'")))
-                    },
+                    ) => Ok(Some(Condition::GreaterThan(ident.value.clone(), n2.clone()))),
+                    _ =>
+                        Err(SerializeError::NotImplemented(String::from("Types not compatible for comparison with operator '>'"))),
                 },
                 BinaryOperator::Lt => match (left.deref(), right.deref()) {
                     (
-                        Expr::Value(Value::SingleQuotedString(s1)),
-                        Expr::Value(Value::SingleQuotedString(s2))
-                    ) => Ok(Some(Condition::LessThan(s1.clone(), s2.clone()))),
+                        Expr::Identifier(ident),
+                        Expr::Value(Value::SingleQuotedString(s))
+                    ) |
                     (
-                        Expr::Value(Value::DoubleQuotedString(s1)),
-                        Expr::Value(Value::DoubleQuotedString(s2)),
-                    ) => Ok(Some(Condition::LessThan(s1.clone(), s2.clone()))),
+                        Expr::Value(Value::SingleQuotedString(s)),
+                        Expr::Identifier(ident),
+                    ) => Ok(Some(Condition::LessThan(ident.value.clone(), s.clone()))),
                     (
-                        Expr::Value(Value::Number(n1, _)),
+                        Expr::Identifier(ident),
+                        Expr::Value(Value::DoubleQuotedString(s))
+                    ) |
+                    (
+                        Expr::Value(Value::DoubleQuotedString(s)),
+                        Expr::Identifier(ident),
+                    ) => Ok(Some(Condition::LessThan(ident.value.clone(), s.clone()))),
+                    (
+                        Expr::Identifier(ident),
                         Expr::Value(Value::Number(n2, _))
-                    ) => Ok(Some(Condition::LessThan(n1.clone(), n2.clone()))),
+                    ) => Ok(Some(Condition::LessThan(ident.value.clone(), n2.clone()))),
                     _ => Err(SerializeError::NotImplemented(String::from(format!("Expression '{:?}' can not be used for conditions", self)))),
                 },
                 BinaryOperator::And => match (
                     Self::deserialize_conditions(&Some(left.deref().clone()))?,
-                    Self::deserialize_conditions(&Some(left.deref().clone()))?
+                    Self::deserialize_conditions(&Some(right.deref().clone()))?
                 ) {
                     (Some(left_cond), Some(right_cond)) => Ok(Some(Condition::And(
                         Box::new(left_cond),
@@ -94,7 +116,7 @@ impl Filtering for Option<Expr> {
                 }
                 BinaryOperator::Or => match (
                     Self::deserialize_conditions(&Some(left.deref().clone()))?,
-                    Self::deserialize_conditions(&Some(left.deref().clone()))?
+                    Self::deserialize_conditions(&Some(right.deref().clone()))?
                 ) {
                     (Some(left_cond), Some(right_cond)) => Ok(Some(Condition::Or(
                         Box::new(left_cond),
