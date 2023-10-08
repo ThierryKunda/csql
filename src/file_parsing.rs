@@ -1,6 +1,6 @@
 use std::{fs::{File, OpenOptions}, io::{BufReader, BufRead, Write, Error}};
 
-use crate::{traits::{Loadable, SourceType}, errors::{LoadingError, ExportError}, entities::Record};
+use crate::{traits::{Loadable, SourceType}, errors::{LoadingError, ExportError}, entities::Record, utils::Value};
 
 pub enum Source {
     FilePath(String),
@@ -95,7 +95,7 @@ impl Loadable<Record> for Buffer {
         }
     }
 
-    fn dump_data(&self, data: Vec<Vec<Option<String>>>) -> Result<(), crate::errors::ExportError> {
+    fn dump_data(&self, data: Vec<Vec<Value>>) -> Result<(), crate::errors::ExportError> {
         match &self.source {
             Source::FilePath(p) => match Self::open_read_write_file(p, true) {
                 Ok(mut f) => {
@@ -112,6 +112,5 @@ impl Loadable<Record> for Buffer {
             Source::HttpUri(_) => todo!(),
         }
     }
-
     
 }
