@@ -241,6 +241,10 @@ impl Queryable<Record> for Table<Record> {
     }
 }
 
+pub struct Config {
+    data_filepaths: Vec<String>,
+    aliases: HashMap<String, String>
+}
 
 pub struct Directory {
     name: String,
