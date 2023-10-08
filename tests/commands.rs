@@ -20,8 +20,19 @@ fn parsing_select() -> Result<(), ParserError>{
 }
 
 #[test]
-fn parsing_update() {
-    
+fn parsing_update() -> Result<(), ParserError> {
+    let dialect = GenericDialect {};
+    let sql = "
+    update user set name = 'john';
+    update user set email = 'john.doe@example.com', password = 'abcd1234' where name = 'john'";
+    let statements = Parser::parse_sql(&dialect, sql)?;
+    let commands: Result<Vec<_>, _> = statements.iter()
+    .map(|st| st.deserialize_as_command())
+    .collect();
+    if let Ok(comms) = &commands {
+        comms.iter().for_each(|c| println!("{:?}", c))
+    }
+    Ok(())
 }
 
 #[test]
