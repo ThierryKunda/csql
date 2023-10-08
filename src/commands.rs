@@ -130,12 +130,12 @@ impl Executable for Statement {
                                 _ => return Err(SerializeError::NotImplemented)
                             }
                         }
-                        let t = select.from.first().unwrap();
-                        if let TableFactor::Table { name, .. } = &t.relation {
-                            let idents = &name.0;
-                            tables = idents.iter()
-                            .map(|ident| ident.value.clone())
-                            .collect()
+                        for t in &select.from {
+                            if let TableFactor::Table { name, .. } = &t.relation {
+                                let idents = &name.0;
+                                idents.iter()
+                                .for_each(|ident| tables.push(ident.value.clone()))
+                            }
                         }
                     },
                     _ => return Err(SerializeError::UselessToImplement)
