@@ -278,18 +278,20 @@ impl Executable for Statement {
             Ok(Command::Update {table, updates, conditions })
             },
             Statement::Delete {
-                tables,
+                from,
                 selection,
                 ..
             } => {
-                let table = tables.first()
-                .ok_or(SerializeError::NotImplementable)?.0
-                .first()
-                .ok_or(SerializeError::NotImplementable)?
-                .value
-                .clone();
+                let mut _t = String::from("");
+                let unique_t = from.first()
+                .ok_or(SerializeError::NotImplementable)?;
+                if let TableFactor::Table { name, ..} = &unique_t.relation {
+                    _t = name.0.first()
+                    .ok_or(SerializeError::NotImplementable)?
+                    .value.clone();
+                }
             let conditions = selection.deserialize_conditions();
-            Ok(Command::Delete { table, conditions })
+            Ok(Command::Delete { table: _t, conditions })
             },
             _ => Err(SerializeError::UselessToImplement),
         }
