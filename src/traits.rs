@@ -11,16 +11,18 @@ type ColumnName = String;
 pub trait Queryable<T: Recordable> {
     fn select(
         &self,
+        _object_names: Option<Vec<String>>,
         attributes_names: Columns,
         conditions: &Option<Condition>,
     ) -> Result<Vec<Vec<Value>>, QueryError>;
-    fn delete(&mut self, conditions: &Option<Condition>) -> Result<(), QueryError>;
+    fn delete(&mut self, _object_name: Option<String>, conditions: &Option<Condition>) -> Result<(), QueryError>;
     fn update(
         &mut self,
+        _object_name: Option<String>,
         new_values: HashMap<ColumnName, Value>,
         conditions: &Option<Condition>,
     ) -> Result<(), QueryError>;
-    fn insert(&mut self, new_record: InsertElement) -> Result<(), QueryError>;
+    fn insert(&mut self, _object_name: Option<String>, new_record: InsertElement) -> Result<(), QueryError>;
 }
 
 pub trait Recordable: Sized {
