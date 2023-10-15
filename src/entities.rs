@@ -138,7 +138,7 @@ impl Table<Record> {
 impl Data for Table<Record> {
     fn bulk_load_data(&mut self, data: &Vec<Vec<Value>>) -> Result<(), LoadingError> {
         for r in data {
-            if let Err(_) = self.insert(None, InsertElement::PlainValues(r.clone())) {
+            if let Err(_) = self.insert(&None, InsertElement::PlainValues(r.clone())) {
                 return Err(LoadingError::InvalidRecord(String::new()));
             }
         }
@@ -155,8 +155,8 @@ impl Data for Table<Record> {
 impl Queryable<Record> for Table<Record> {
     fn select(
         &self,
-        _object_names: Option<Vec<String>>,
-        attributes_names: Columns,
+        _object_names: &Option<Vec<String>>,
+        attributes_names: &Columns,
         conditions: &Option<Condition>,
     ) -> Result<Vec<Vec<Option<String>>>, QueryError> {
         match (attributes_names, conditions) {
@@ -193,7 +193,7 @@ impl Queryable<Record> for Table<Record> {
         }
     }
 
-    fn delete(&mut self, _object_name: Option<String>, conditions: &Option<Condition>) -> Result<(), QueryError> {
+    fn delete(&mut self, _object_name: &Option<String>, conditions: &Option<Condition>) -> Result<(), QueryError> {
         match conditions {
             None => self.records.clear(),
             Some(conds) => {
@@ -209,7 +209,7 @@ impl Queryable<Record> for Table<Record> {
         Ok(())
     }
 
-    fn update(&mut self, _object_name: Option<String>, new_values: HashMap<String, Option<String>>, conditions: &Option<Condition>) -> Result<(), QueryError> {
+    fn update(&mut self, _object_name: &Option<String>, new_values: HashMap<String, Option<String>>, conditions: &Option<Condition>) -> Result<(), QueryError> {
         match conditions {
             None => for r in self.records.iter_mut() {
                 r.update_values(&new_values)?;
@@ -223,7 +223,7 @@ impl Queryable<Record> for Table<Record> {
         Ok(())
     }
 
-    fn insert(&mut self, _object_name: Option<String>, new_record: InsertElement) -> Result<(), QueryError> {
+    fn insert(&mut self, _object_name: &Option<String>, new_record: InsertElement) -> Result<(), QueryError> {
         match new_record {
             InsertElement::PlainValues(values) => if values.len() == self.columns_names.len() {
                 self.records.push(Record::new(values, Rc::clone(&self.columns_names)));
