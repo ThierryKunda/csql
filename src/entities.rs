@@ -367,3 +367,45 @@ impl DataStore {
         Self { tables: res }
     }
 }
+
+impl Queryable<Record> for DataStore {
+    fn select(
+        &self,
+        _object_names: &Option<Vec<String>>,
+        attributes_names: &Columns,
+        conditions: &Option<Condition>,
+    ) -> Result<Vec<Vec<Value>>, QueryError> {
+        // For now, SELECT on a single table is implemented
+        // Result will be generated from the first table listed by the user, by default
+        let t_name = _object_names.as_ref()
+        .ok_or(QueryError)?
+        .first()
+        .ok_or(QueryError)?
+        .clone();
+        let t = self.tables.get(&t_name).ok_or(QueryError)?;
+        t.select(_object_names, attributes_names, conditions)
+    }
+
+    fn delete(&mut self, _object_name: &Option<String>, conditions: &Option<Condition>) -> Result<(), QueryError> {
+        let t_name = _object_name.as_ref().ok_or(QueryError)?;
+        let t = self.tables.get_mut(t_name).ok_or(QueryError)?;
+        t.delete(_object_name, conditions)
+    }
+
+    fn update(
+        &mut self,
+        _object_name: &Option<String>,
+        new_values: HashMap<String, Option<String>>,
+        conditions: &Option<Condition>,
+    ) -> Result<(), QueryError> {
+        let t_name = _object_name.as_ref().ok_or(QueryError)?;
+        let t = self.tables.get_mut(t_name).ok_or(QueryError)?;
+        t.update(_object_name, new_values, conditions)
+    }
+
+    fn insert(&mut self, _object_name: &Option<String>, new_record: InsertElement) -> Result<(), QueryError> {
+        let t_name = _object_name.as_ref().ok_or(QueryError)?;
+        let t = self.tables.get_mut(t_name).ok_or(QueryError)?;
+        t.insert(_object_name, new_record)
+    }
+}
