@@ -353,3 +353,17 @@ impl Storage for Directory {
         }
     }
 }
+
+pub struct DataStore {
+    tables: BTreeMap<String, Table<Record>>, 
+}
+
+impl DataStore {
+    pub fn new(tables: Vec<Table<Record>>) -> Self {
+        let mut res = BTreeMap::new();
+        for t in tables {
+            res.insert(t.name.clone(), t);
+        }
+        Self { tables: res }
+    }
+}
