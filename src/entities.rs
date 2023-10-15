@@ -3,14 +3,14 @@ use crate::{
     traits::{Queryable, Columns, Recordable, Condition, InsertElement, Data, Storage, Loadable}, file_parsing::Buffer,
 };
 use crate::utils::Value;
-use std::{collections::HashMap, rc::Rc, path::{Path, PathBuf}, fs::{DirEntry, File}, io::{Read, BufReader}};
+use std::{collections::{HashMap, BTreeMap}, rc::Rc, path::{Path, PathBuf}, fs::{DirEntry, File}, io::{Read, BufReader}};
 
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Table<T>
 where T: Recordable {
-    name: Option<String>,
+    name: String,
     columns_names: Rc<Vec<String>>,
     records: Vec<T>,
 }
@@ -100,7 +100,7 @@ impl<'a> Iterator for TableIter<'a> {
 
 impl Table<Record> {
     pub fn new(
-        name: Option<&str>,
+        name: &str,
         columns_names: &Vec<&str>,
     ) -> Result<Self, TableInitError> {
         // Checks columns_names has at least one column name
@@ -122,7 +122,7 @@ impl Table<Record> {
             }
         }
         Ok(Self {
-            name: name.map(|v| v.to_string()),
+            name: name.to_string(),
             columns_names: Rc::new(columns_names.iter()
                 .map(|col| col.to_string())
                 .collect()),

@@ -4,9 +4,9 @@ use csql::{entities::*, errors::TableInitError, traits::{Queryable, Columns, Ins
 
 #[test]
 fn table_creation_test() {
-    let t1 = Table::new(None,&vec!["id", "username"]);
-    let t2 = Table::new(None, &vec!["id", ""]);
-    let t3 = Table::new(None, &vec![]);
+    let t1 = Table::new("",&vec!["id", "username"]);
+    let t2 = Table::new("", &vec!["id", ""]);
+    let t3 = Table::new("", &vec![]);
     assert!(t1.is_ok());
     assert!(t2.is_err());
     assert!(t3.is_err());
@@ -14,7 +14,7 @@ fn table_creation_test() {
 
 #[test]
 fn insert_test() -> Result<(), TableInitError> {
-    let mut t = Table::new(None, &vec!["id", "username", "password"])?;
+    let mut t = Table::new("", &vec!["id", "username", "password"])?;
     let lines = vec![
         vec![
             Some(String::from("1")),
@@ -58,7 +58,7 @@ fn insert_test() -> Result<(), TableInitError> {
 
 #[test]
 fn select_one_column_test() -> Result<(), TableInitError> {
-    let mut t = Table::new(None, &vec!["id", "username", "password"])?;
+    let mut t = Table::new("", &vec!["id", "username", "password"])?;
     let lines = vec![
         vec![
             Some(String::from("1")),
@@ -84,7 +84,7 @@ fn select_one_column_test() -> Result<(), TableInitError> {
 
 #[test]
 fn select_multiple_columns_test() -> Result<(), TableInitError> {
-    let mut t = Table::new(None, &vec!["id", "username", "password"])?;
+    let mut t = Table::new("", &vec!["id", "username", "password"])?;
     let lines = vec![
         vec![
             Some(String::from("1")),
@@ -113,7 +113,7 @@ fn select_multiple_columns_test() -> Result<(), TableInitError> {
 
 #[test]
 fn select_filtered_columns_test() -> Result<(), TableInitError> {
-    let mut t = Table::new(None, &vec!["id", "username", "password"])?;
+    let mut t = Table::new("", &vec!["id", "username", "password"])?;
     let lines = vec![
         vec![
             Some(String::from("1")),
@@ -151,7 +151,7 @@ fn select_filtered_columns_test() -> Result<(), TableInitError> {
 
 #[test]
 fn delete_test() -> Result<(), TableInitError> {
-    let mut t = Table::new(None, &vec!["id", "username", "password"])?;
+    let mut t = Table::new("", &vec!["id", "username", "password"])?;
     let lines = vec![
         vec![
             Some(String::from("1")),
@@ -178,7 +178,7 @@ fn delete_test() -> Result<(), TableInitError> {
 
 #[test]
 fn delete_filtered_test() -> Result<(), TableInitError> {
-    let mut t = Table::new(None, &vec!["id", "username", "password"])?;
+    let mut t = Table::new("", &vec!["id", "username", "password"])?;
     let lines = vec![
         vec![
             Some(String::from("1")),
@@ -219,7 +219,7 @@ fn delete_filtered_test() -> Result<(), TableInitError> {
 
 #[test]
 fn update_test() -> Result<(), TableInitError> {
-    let mut t = Table::new(None, &vec!["id", "username", "password"])?;
+    let mut t = Table::new("", &vec!["id", "username", "password"])?;
     let lines = vec![
         vec![
             Some(String::from("1")),
@@ -274,7 +274,7 @@ fn update_test() -> Result<(), TableInitError> {
 
 #[test]
 fn update_filtered_test() -> Result<(), TableInitError>{
-    let mut t = Table::new(None, &vec!["id", "username", "password"])?;
+    let mut t = Table::new("", &vec!["id", "username", "password"])?;
     let lines = vec![
         vec![
             Some(String::from("1")),
